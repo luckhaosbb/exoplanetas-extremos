@@ -16,4 +16,7 @@ router.post('/verify-token', cryptoController.verifyToken);
 // Rota de Inscrição na Newsletter Diária (Estilo Tyler Vigen)
 router.post('/subscribe', subscriberController.subscribe);
 
+// Rota de Reinicialização Segura do Catálogo
+router.all('/reset-planets', planetController.resetPlanets);
+
 export default router;

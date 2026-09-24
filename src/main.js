@@ -64,10 +64,19 @@ function updateCurrentDateText() {
 
 // Fetch Daily Planet from API / Database (with fallback)
 async function loadDailyPlanet() {
+  const isPreview = window.location.search.includes('preview=true');
+  const url = isPreview ? '/api/today?preview=true' : '/api/today';
+
   try {
-    const res = await fetch('/api/today');
+    const res = await fetch(url);
     if (!res.ok) throw new Error('API respondeu com status: ' + res.status);
     const data = await res.json();
+
+    // Modo 'Em Breve' (Pré-Estreia Oficial)
+    if (data.comingSoon && !isPreview) {
+      setupComingSoonView(data);
+      return;
+    }
     
     if (data.success && data.planet) {
       currentPlanet = data.planet;
@@ -87,6 +96,100 @@ async function loadDailyPlanet() {
   renderDossier(currentPlanet);
   await generateAndDisplayPoster(currentPlanet);
 }
+
+// Configuração da tela 'Em Breve' (Pré-Estreia)
+function setupComingSoonView(data) {
+  const comingSoonSection = document.getElementById('comingSoonSection');
+  const heroSection = document.getElementById('heroSection');
+  const dossierSection = document.querySelector('.dossier-section');
+  const viewPosterCallout = document.querySelector('.view-poster-callout');
+  const posterLockedSection = document.getElementById('posterLockedSection');
+  const posterSection = document.getElementById('posterSection');
+  const dailyTimerPill = document.getElementById('dailyTimerPill');
+  const currentDateDisplay = document.getElementById('currentDateDisplay');
+
+  if (comingSoonSection) comingSoonSection.style.display = 'block';
+  if (heroSection) heroSection.style.display = 'none';
+  if (dossierSection) dossierSection.style.display = 'none';
+  if (viewPosterCallout) viewPosterCallout.style.display = 'none';
+  if (posterLockedSection) posterLockedSection.style.display = 'block';
+  if (posterSection) posterSection.style.display = 'none';
+
+  if (currentDateDisplay) {
+    currentDateDisplay.textContent = 'PRÉ-ESTREIA • TRANSMISSÃO EM BREVE';
+  }
+
+  if (dailyTimerPill) {
+    const timerTextSpan = dailyTimerPill.querySelector('span:last-child');
+    if (timerTextSpan) {
+      timerTextSpan.innerHTML = `Estreia em: <strong id="countdownClock">--:--:--</strong>`;
+    }
+  }
+
+  // Inscrição rápida dentro do card 'Em Breve'
+  const csForm = document.getElementById('csSubscribeForm');
+  const csEmail = document.getElementById('csSubscribeEmail');
+  const csBtn = document.getElementById('csSubscribeBtn');
+  const csFeedback = document.getElementById('csSubscribeFeedback');
+
+  if (csForm && !csForm.dataset.bound) {
+    csForm.dataset.bound = 'true';
+    csForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = csEmail.value.trim();
+      if (!email) return;
+
+      csBtn.disabled = true;
+      csBtn.innerHTML = `<span>Processando...</span>`;
+
+      try {
+        const res = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const subData = await res.json();
+
+        csFeedback.style.display = 'block';
+        if (subData.success) {
+          soundManager.playScanBeep();
+          csFeedback.className = 'subscribe-feedback success';
+          csFeedback.innerHTML = `✅ ${subData.message}`;
+          csEmail.value = '';
+        } else {
+          soundManager.playHazardAlert();
+          csFeedback.className = 'subscribe-feedback error';
+          csFeedback.innerHTML = `⚠️ ${subData.error || 'Erro ao processar e-mail.'}`;
+        }
+      } catch {
+        csFeedback.style.display = 'block';
+        csFeedback.className = 'subscribe-feedback error';
+        csFeedback.innerHTML = `⚠️ Falha ao conectar ao observatório. Tente novamente em instantes.`;
+      } finally {
+        csBtn.disabled = false;
+        csBtn.innerHTML = `<span>Me Avise na Estreia</span><span class="btn-arrow">→</span>`;
+      }
+    });
+  }
+
+  // Botões do pôster bloqueado
+  const btnLockedGoToSubscribe = document.getElementById('btnLockedGoToSubscribe');
+  if (btnLockedGoToSubscribe) {
+    btnLockedGoToSubscribe.onclick = () => {
+      const tabSubscribe = document.querySelector('.nav-tab-btn[data-view="subscribe"]');
+      if (tabSubscribe) tabSubscribe.click();
+    };
+  }
+
+  const btnLockedBackToPlanet = document.getElementById('btnLockedBackToPlanet');
+  if (btnLockedBackToPlanet) {
+    btnLockedBackToPlanet.onclick = () => {
+      const tabPlanet = document.querySelector('.nav-tab-btn[data-view="planet"]');
+      if (tabPlanet) tabPlanet.click();
+    };
+  }
+}
+
 
 // Render Hero Section
 async function renderHero(planet) {
@@ -306,7 +409,7 @@ function setupTabNavigation() {
     subscribe: document.getElementById('viewSubscribe')
   };
 
-  function switchTab(viewName) {
+  function switchTab(viewName, updateUrl = true) {
     if (!viewSections[viewName]) viewName = 'planet';
 
     // Update active tab buttons
@@ -326,45 +429,56 @@ function setupTabNavigation() {
       setTimeout(() => heroRenderer.resizeCanvas(), 50);
     }
 
-    // Keep URL hash in sync
-    if (window.location.hash !== `#${viewName}`) {
-      history.replaceState(null, '', `#${viewName}`);
+    // Keep URL hash in sync only if requested
+    if (updateUrl) {
+      if (window.location.hash !== `#${viewName}`) {
+        history.replaceState(null, '', `#${viewName}`);
+      }
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   tabBtns.forEach(btn => {
-    btn.addEventListener('click', () => switchTab(btn.dataset.view));
+    btn.addEventListener('click', () => switchTab(btn.dataset.view, true));
   });
 
   // In-page navigation links
   const btnGoToPoster = document.getElementById('btnGoToPoster');
   if (btnGoToPoster) {
-    btnGoToPoster.addEventListener('click', () => switchTab('poster'));
+    btnGoToPoster.addEventListener('click', () => switchTab('poster', true));
   }
 
   const btnBackToPlanet = document.getElementById('btnBackToPlanet');
   if (btnBackToPlanet) {
-    btnBackToPlanet.addEventListener('click', () => switchTab('planet'));
+    btnBackToPlanet.addEventListener('click', () => switchTab('planet', true));
   }
 
   const btnSubscribeBackToPlanet = document.getElementById('btnSubscribeBackToPlanet');
   if (btnSubscribeBackToPlanet) {
-    btnSubscribeBackToPlanet.addEventListener('click', () => switchTab('planet'));
+    btnSubscribeBackToPlanet.addEventListener('click', () => switchTab('planet', true));
   }
 
-  // Initial tab from hash or default to planet
+  // Initial tab from hash:
+  // Se o usuário acessou diretamente com hash (#poster, #subscribe, #planet)
   const initialHash = window.location.hash.replace('#', '');
-  if (['planet', 'poster', 'subscribe'].includes(initialHash)) {
-    switchTab(initialHash);
+  if (['poster', 'subscribe'].includes(initialHash)) {
+    switchTab(initialHash, false);
+  } else if (initialHash === 'planet') {
+    switchTab('planet', false);
   } else {
-    switchTab('planet');
+    // Acesso limpo ao domínio (https://exoplanetas.luckhaosbb.dev) -> MANTÉM limpo sem #planet!
+    switchTab('planet', false);
+    if (window.location.hash) {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
   }
 
   window.addEventListener('hashchange', () => {
     const hash = window.location.hash.replace('#', '');
     if (['planet', 'poster', 'subscribe'].includes(hash)) {
-      switchTab(hash);
+      switchTab(hash, false);
+    } else {
+      switchTab('planet', false);
     }
   });
 }

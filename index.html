@@ -69,6 +69,64 @@
       <!-- VIEW 1: PLANETA DO DIA (Página Principal)  -->
       <!-- ========================================== -->
       <div class="view-page" id="viewPlanet">
+        <!-- Section: Em Breve (Pré-Estreia Oficial) -->
+        <section class="coming-soon-section" id="comingSoonSection" style="display: none;">
+          <div class="coming-soon-card">
+            <div class="coming-soon-radar-wrapper">
+              <div class="radar-sweep"></div>
+              <div class="radar-rings"></div>
+              <div class="radar-center-blip"></div>
+              <span class="radar-label">🛰️ SENSOR TELEMÉTRICO EM CALIBRAÇÃO</span>
+            </div>
+
+            <div class="coming-soon-content">
+              <div class="coming-soon-badge-row">
+                <span class="badge-status-pulsing">● TRANSMISSÃO BLOQUEADA</span>
+                <span class="badge-status-gold">ESTREIA OFICIAL EM BREVE</span>
+              </div>
+
+              <h2 class="coming-soon-title">PRIMEIRO MUNDO HOSTIL EM PREPARAÇÃO</h2>
+              <p class="coming-soon-subtitle">
+                O observatório está finalizando os ajustes gráficos e a calibração telemetrica do primeiro exoplaneta extremo do acervo. A transmissão inaugural será liberada em breve com o pôster colecionável vintage <strong>ISSUE #001</strong>.
+              </p>
+
+              <div class="coming-soon-features-grid">
+                <div class="cs-feature-card">
+                  <span class="cs-icon">🪐</span>
+                  <h4>Mundo Diário #001</h4>
+                  <p>Um exoplaneta real com condições de clima sádico e letalidade extrema revelado na estreia.</p>
+                </div>
+                <div class="cs-feature-card">
+                  <span class="cs-icon">🎨</span>
+                  <h4>Pôster Vintage A4</h4>
+                  <p>Arte colecionável em 300 DPI com estilo clássico e o selo inaugural <strong>ISSUE #001</strong>.</p>
+                </div>
+                <div class="cs-feature-card">
+                  <span class="cs-icon">🔐</span>
+                  <h4>Certificado Criptográfico</h4>
+                  <p>Token de autenticidade NFT-like assinado pelo servidor e gravado nos metadados binários do PNG.</p>
+                </div>
+              </div>
+
+              <!-- Quick Subscribe Callout -->
+              <div class="coming-soon-subscribe-box">
+                <div class="cs-subscribe-text">
+                  <h3>🔔 Deseja ser alertado no instante da liberação?</h3>
+                  <p>Cadastre seu e-mail para receber a notificação do primeiro drop e garantir seu pôster inaugural:</p>
+                </div>
+                <form class="cs-subscribe-form" id="csSubscribeForm">
+                  <input type="email" id="csSubscribeEmail" placeholder="seu-email@exemplo.com" required autocomplete="email" />
+                  <button type="submit" class="btn btn-accent" id="csSubscribeBtn">
+                    <span>Me Avise na Estreia</span>
+                    <span class="btn-arrow">→</span>
+                  </button>
+                </form>
+                <div class="subscribe-feedback" id="csSubscribeFeedback" style="display: none;"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- Hero: Exoplaneta do Dia -->
         <section class="hero-section" id="heroSection">
           <div class="hero-grid">
@@ -200,6 +258,25 @@
       <!-- VIEW 2: PÔSTER DEDICADO                    -->
       <!-- ========================================== -->
       <div class="view-page" id="viewPoster" style="display: none;">
+        <!-- Locked Poster Section (Em Breve) -->
+        <div class="poster-locked-section" id="posterLockedSection" style="display: none;">
+          <div class="poster-locked-card">
+            <span class="locked-icon">🔒</span>
+            <span class="locked-badge">ACERVO TEMPORARIAMENTE BLOQUEADO</span>
+            <h2>PÔSTER COLECIONÁVEL A4</h2>
+            <p>
+              A primeira capa clássica oficial com a numeração inaugural <strong>ISSUE #001</strong> será disponibilizada para download em alta resolução (300 DPI) com certificado de autenticidade criptográfico no momento da estreia oficial.
+            </p>
+            <div class="locked-actions">
+              <button class="btn btn-accent" id="btnLockedGoToSubscribe">
+                <span>Inscrever-se para ser Notificado</span>
+                <span class="btn-arrow">→</span>
+              </button>
+              <button class="btn btn-secondary" id="btnLockedBackToPlanet">Voltar ao Início</button>
+            </div>
+          </div>
+        </div>
+
         <section class="comic-poster-section" id="posterSection">
           <div class="poster-page-header">
             <div class="poster-title-area">
@@ -331,7 +408,7 @@
 
         <div class="footer-credits">
           <p>
-            ✨ <strong>Exoplanetas Extremos</strong> &bull; Homenagem ao projeto <a href="https://science.nasa.gov/exoplanets/immersive/galaxy-of-horrors/" target="_blank" rel="noopener">Galaxy of Horrors da NASA</a> &bull; Dados científicos sincronizados via <a href="https://exoplanetarchive.ipac.caltech.edu/" target="_blank" rel="noopener">NASA Exoplanet Archive TAP API</a>
+            <strong>Exoplanetas Extremos</strong> &bull; Homenagem ao projeto <a href="https://science.nasa.gov/exoplanets/immersive/galaxy-of-horrors/" target="_blank" rel="noopener">Galaxy of Horrors da NASA</a> &bull; Dados científicos sincronizados via <a href="https://exoplanetarchive.ipac.caltech.edu/" target="_blank" rel="noopener">NASA Exoplanet Archive TAP API</a>
           </p>
           <p class="footer-sub">
             Todos os direitos do conceito preservados &bull; Drop diário ininterrupto com persistência em banco de dados.

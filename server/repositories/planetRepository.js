@@ -120,5 +120,20 @@ export const planetRepository = {
     }
 
     return readLocalDb().length;
+  },
+
+  async clearAll() {
+    if (isPostgres()) {
+      try {
+        const pool = getPool();
+        await pool.query('TRUNCATE TABLE published_planets RESTART IDENTITY CASCADE');
+        return true;
+      } catch (err) {
+        console.error('Erro ao limpar planetas no PostgreSQL:', err.message);
+      }
+    }
+
+    writeLocalDb([]);
+    return true;
   }
 };

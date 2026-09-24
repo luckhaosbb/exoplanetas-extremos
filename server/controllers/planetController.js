@@ -11,7 +11,8 @@ export const planetController = {
    */
   async getToday(req, res) {
     try {
-      const data = await planetService.getDailyPlanet();
+      const isPreview = req.query.preview === 'true';
+      const data = await planetService.getDailyPlanet({ isPreview });
       return res.json(data);
     } catch (error) {
       console.error('❌ [PLANET CONTROLLER] Erro ao obter exoplaneta diário:', error);
@@ -76,6 +77,23 @@ export const planetController = {
         success: false,
         error: 'Falha interna ao obter estatísticas.'
       });
+    }
+  },
+
+  /**
+   * POST/GET /api/reset-planets
+   * Reseta a base de planetas para o lançamento oficial
+   */
+  async resetPlanets(req, res) {
+    try {
+      const { planetRepository } = await import('../repositories/planetRepository.js');
+      await planetRepository.clearAll();
+      return res.json({
+        success: true,
+        message: 'Tabela de planetas resetada com sucesso para a grande estreia!'
+      });
+    } catch (error) {
+      return res.status(500).json({ success: false, error: error.message });
     }
   }
 };

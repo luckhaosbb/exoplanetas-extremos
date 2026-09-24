@@ -35,9 +35,20 @@ if (fs.existsSync(DIST_PATH)) {
 async function bootstrap() {
   try {
     await initDatabase();
+
+    // Se estiver em modo de pré-estreia (Em Breve), garante que a base de planetas comece 100% limpa
+    if (config.comingSoon) {
+      const { planetRepository } = await import('./repositories/planetRepository.js');
+      await planetRepository.clearAll();
+      console.log('🛰️ [PRE-LAUNCH] Base de exoplanetas resetada para aguardar a estreia oficial.');
+    }
+
     app.listen(config.port, () => {
       console.log(`🌌 Servidor de Exoplanetas Extremos rodando na porta ${config.port} (${config.nodeEnv})`);
       console.log(`📡 API Pronta: http://localhost:${config.port}/api/today`);
+      if (config.comingSoon) {
+        console.log(`🔒 Modo 'Em Breve' ATIVO. O catálogo permanece bloqueado até o lançamento oficial.`);
+      }
     });
   } catch (error) {
     console.error('❌ Falha fatal ao inicializar o servidor:', error);

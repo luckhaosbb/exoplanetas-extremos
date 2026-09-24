@@ -1,3 +1,4 @@
+import { config } from '../config/index.js';
 import { planetRepository } from '../repositories/planetRepository.js';
 import { cryptoService } from './cryptoService.js';
 import { EXOPLANETS_CATALOG } from '../data/exoplanets.js';
@@ -24,10 +25,23 @@ export const planetService = {
 
   /**
    * Obtém o exoplaneta do dia atual ou realiza a publicação automática do próximo planeta inédito
-   * @param {string} [customDateStr] Opcional, para testes ou offsets
+   * @param {object} [options]
+   * @param {string} [options.customDateStr]
+   * @param {boolean} [options.isPreview]
    * @returns {Promise<object>}
    */
-  async getDailyPlanet(customDateStr = null) {
+  async getDailyPlanet({ customDateStr = null, isPreview = false } = {}) {
+    // Se o modo 'Em Breve' estiver ativo e não for requisição de pré-visualização, oculta o planeta
+    if (config.comingSoon && !isPreview) {
+      return {
+        success: true,
+        comingSoon: true,
+        launchDate: config.launchDate,
+        message: 'Primeiro Drop Oficial em Breve! Sintonização telemetrica em andamento.',
+        serverTimestamp: new Date().toISOString()
+      };
+    }
+
     const today = customDateStr || this.getTodayDateString();
 
     // 1. Verifica se já existe um planeta publicado para a data
