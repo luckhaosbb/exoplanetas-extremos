@@ -1,0 +1,387 @@
+import './style.css';
+import { EXOPLANETS, getDailyExoplanetFallback } from './data/exoplanets.js';
+import { PlanetRenderer } from './components/planetRenderer.js';
+import { ComicBannerGenerator } from './components/comicBannerGenerator.js';
+import { fetchNasaExoplanetData } from './components/nasaApi.js';
+import { soundManager } from './components/soundEffects.js';
+
+// Application State
+let currentPlanet = null;
+let currentPosterDataUrl = null;
+let heroRenderer = null;
+
+// DOM Elements
+const heroCanvas = document.getElementById('heroCanvas');
+const currentDateDisplay = document.getElementById('currentDateDisplay');
+const countdownClock = document.getElementById('countdownClock');
+const soundToggleBtn = document.getElementById('soundToggleBtn');
+const soundIcon = document.getElementById('soundIcon');
+
+// Hero Information Elements
+const heroPlanetName = document.getElementById('heroPlanetName');
+const heroPlanetTitle = document.getElementById('heroPlanetTitle');
+const heroPlanetSummary = document.getElementById('heroPlanetSummary');
+const heroThreatScore = document.getElementById('heroThreatScore');
+const heroCategory = document.getElementById('heroCategory');
+const heroConstellation = document.getElementById('heroConstellation');
+const heroCoordBadge = document.getElementById('heroCoordBadge');
+
+const heroTemp = document.getElementById('heroTemp');
+const heroDistance = document.getElementById('heroDistance');
+const heroSurvival = document.getElementById('heroSurvival');
+const heroMass = document.getElementById('heroMass');
+
+const survivalNarrative = document.getElementById('survivalNarrative');
+const simulateSurvivalBtn = document.getElementById('simulateSurvivalBtn');
+const nasaStatusText = document.getElementById('nasaStatusText');
+
+// Dossier Elements
+const dossierSpecsList = document.getElementById('dossierSpecsList');
+const dossierHazardTags = document.getElementById('dossierHazardTags');
+const dossierDescription = document.getElementById('dossierDescription');
+
+// Comic Poster Elements
+const posterOrientationPill = document.getElementById('posterOrientationPill');
+const comicPosterPreviewCard = document.getElementById('comicPosterPreviewCard');
+const comicLoadingSpinner = document.getElementById('comicLoadingSpinner');
+const comicPosterImg = document.getElementById('comicPosterImg');
+const downloadPosterBtn = document.getElementById('downloadPosterBtn');
+
+// Initialize Application
+async function initApp() {
+  updateCurrentDateText();
+  startCountdownTimer();
+  bindEvents();
+  await loadDailyPlanet();
+}
+
+// Format today's date in Portuguese
+function updateCurrentDateText() {
+  const now = new Date();
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  currentDateDisplay.textContent = now.toLocaleDateString('pt-BR', options);
+}
+
+// Fetch Daily Planet from API / Database (with fallback)
+async function loadDailyPlanet() {
+  try {
+    const res = await fetch('/api/today');
+    if (!res.ok) throw new Error('API respondeu com status: ' + res.status);
+    const data = await res.json();
+    
+    if (data.success && data.planet) {
+      currentPlanet = data.planet;
+      currentPlanet.issueNumber = data.issueNumber || 1;
+      currentPlanet.bannerOrientation = data.bannerOrientation || currentPlanet.bannerOrientation || 'vertical';
+      currentPlanet.cryptoCertificate = data.cryptoCertificate || null;
+    } else {
+      throw new Error('Formato inválido retornado pela API');
+    }
+  } catch (err) {
+    console.warn('⚠️ Não foi possível conectar à API de exoplanetas (/api/today). Ativando fallback determinístico local:', err);
+    currentPlanet = getDailyExoplanetFallback();
+  }
+
+  // Render hero, 3D and details
+  await renderHero(currentPlanet);
+  renderDossier(currentPlanet);
+  await generateAndDisplayPoster(currentPlanet);
+}
+
+// Render Hero Section
+async function renderHero(planet) {
+  heroPlanetName.textContent = planet.name;
+  heroPlanetTitle.textContent = planet.title;
+  heroPlanetSummary.textContent = planet.summary;
+  heroThreatScore.textContent = `💀 ${planet.dangerLevel.toFixed(1)} / 10`;
+  heroCategory.textContent = planet.category;
+  heroConstellation.textContent = `🌌 Constelação: ${planet.constellation}`;
+  heroCoordBadge.textContent = `${planet.constellation.toUpperCase()} • ${planet.distanceLy} LY`;
+
+  heroTemp.textContent = `${planet.tempC.toLocaleString('pt-BR')} °C`;
+  heroDistance.textContent = `${planet.distanceLy.toLocaleString('pt-BR')} anos-luz`;
+  heroSurvival.textContent = planet.survivalTime;
+  heroMass.textContent = `${planet.massVsEarth}x Terra`;
+
+  survivalNarrative.textContent = `Simulação de pouso: Na superfície de ${planet.name}, ${planet.dangerLabel.toLowerCase()}.`;
+
+  // Start 3D Engine in Canvas
+  if (!heroRenderer) {
+    heroRenderer = new PlanetRenderer(heroCanvas, planet);
+  } else {
+    heroRenderer.setPlanet(planet);
+  }
+
+  // Live NASA Exoplanet Archive TAP API query
+  nasaStatusText.textContent = `Consultando NASA Exoplanet Archive para ${planet.name}...`;
+  const nasaResult = await fetchNasaExoplanetData(planet.name);
+
+  if (nasaResult.success) {
+    const raw = nasaResult.raw;
+    nasaStatusText.innerHTML = `✅ <strong>Sincronizado com a NASA:</strong> ${raw.pl_name} | Período Orbital: ${raw.pl_orbper ? raw.pl_orbper.toFixed(2) + ' dias' : 'N/A'}`;
+  } else {
+    nasaStatusText.innerHTML = `📡 <strong>Base Astronômica Local Ativa:</strong> ${planet.name} (${planet.starType})`;
+  }
+}
+
+// Render Dossier Section
+function renderDossier(planet) {
+  dossierSpecsList.innerHTML = `
+    <li><span>Distância da Terra:</span> <span>${planet.distanceLy} anos-luz</span></li>
+    <li><span>Temperatura da Superfície:</span> <span>${planet.tempC} °C (${planet.tempF} °F)</span></li>
+    <li><span>Massa Relativa:</span> <span>${planet.massVsEarth}x a Terra</span></li>
+    <li><span>Raio Estimado:</span> <span>${planet.radiusVsEarth}x a Terra</span></li>
+    <li><span>Período Orbital (Ano):</span> <span>${planet.orbitalPeriodDays} dias</span></li>
+    <li><span>Composição Atmosférica:</span> <span>${planet.atmosphere}</span></li>
+    <li><span>Estrela Hospedeira:</span> <span>${planet.starType}</span></li>
+    <li><span>Constelação:</span> <span>${planet.constellation}</span></li>
+  `;
+
+  dossierHazardTags.innerHTML = '';
+  planet.hazardTags.forEach(tag => {
+    const span = document.createElement('span');
+    span.className = 'hazard-tag';
+    span.textContent = `⚠️ ${tag}`;
+    dossierHazardTags.appendChild(span);
+  });
+
+  dossierDescription.textContent = planet.description;
+}
+
+// Generate Comic Poster (A4) and prepare download
+async function generateAndDisplayPoster(planet) {
+  const orientation = planet.bannerOrientation || 'vertical';
+  
+  // Update page title and discreet orientation pill
+  const posterPageTitle = document.getElementById('posterPageTitle');
+  if (posterPageTitle) {
+    posterPageTitle.textContent = `PÔSTER • ${planet.name}`;
+  }
+  if (posterOrientationPill) {
+    posterOrientationPill.textContent = (orientation === 'horizontal') ? 'Formato Horizontal' : 'Formato Vertical';
+  }
+  comicPosterPreviewCard.className = `comic-poster-preview-card ${orientation}`;
+
+  try {
+    const generator = new ComicBannerGenerator(planet, orientation, planet.cryptoCertificate);
+    currentPosterDataUrl = await generator.generatePoster();
+
+    comicLoadingSpinner.style.display = 'none';
+    comicPosterImg.src = currentPosterDataUrl;
+    comicPosterImg.style.display = 'block';
+    downloadPosterBtn.disabled = false;
+
+    // Silently archive in database backend
+    archiveBannerInDatabase(planet.id, currentPosterDataUrl);
+  } catch (err) {
+    console.error('Erro na geração do banner Comic A4:', err);
+    comicLoadingSpinner.innerHTML = `<p style="color: var(--accent-red)">Falha ao gerar o pôster em alta resolução.</p>`;
+  }
+}
+
+// Archive generated banner in backend PostgreSQL/local DB
+async function archiveBannerInDatabase(planetId, bannerDataUrl) {
+  try {
+    await fetch('/api/save-banner', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        planetId,
+        bannerDataUrl
+      })
+    });
+  } catch {
+    // Silent catch, client doesn't need to break if offline
+  }
+}
+
+// Download A4 Poster
+function downloadPoster() {
+  if (!currentPosterDataUrl || !currentPlanet) return;
+  
+  soundManager.playScanBeep();
+  const link = document.createElement('a');
+  const cleanName = currentPlanet.name.replace(/\s+/g, '-').toUpperCase();
+  const orientation = (currentPlanet.bannerOrientation || 'vertical').toUpperCase();
+  link.download = `EXOPLANETA-EXTREMO-${cleanName}-POSTER-A4-${orientation}.png`;
+  link.href = currentPosterDataUrl;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// Survival Simulator Action
+function simulateSurvival() {
+  soundManager.playHazardAlert();
+  if (!currentPlanet) return;
+
+  alert(
+    `🚨 SIMULAÇÃO DE SOBREVIVÊNCIA HUMANA: ${currentPlanet.name.toUpperCase()} 🚨\n\n` +
+    `• Tempo Máximo de Vida: ${currentPlanet.survivalTime}\n` +
+    `• Causa Mortis: ${currentPlanet.dangerLabel}\n` +
+    `• Temperatura do Meio: ${currentPlanet.tempC} °C\n` +
+    `• Atmosfera Hostil: ${currentPlanet.atmosphere}\n\n` +
+    `Resultado Biológico: Ruptura molecular e falha biológica total e irreversível no primeiro instante de contato.`
+  );
+}
+
+// Realtime countdown clock to next daily planet drop (midnight 00:00:00)
+function startCountdownTimer() {
+  function updateClock() {
+    const now = new Date();
+    const midnight = new Date();
+    midnight.setHours(24, 0, 0, 0);
+
+    const diffMs = midnight - now;
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+    const pad = (n) => String(n).padStart(2, '0');
+    countdownClock.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  }
+
+  updateClock();
+  setInterval(updateClock, 1000);
+}
+
+// Subscribe Form Action (Tyler Vigen style drop notifications)
+function setupSubscribeForm() {
+  const form = document.getElementById('subscribeForm');
+  const emailInput = document.getElementById('subscribeEmail');
+  const submitBtn = document.getElementById('subscribeBtn');
+  const feedback = document.getElementById('subscribeFeedback');
+
+  if (!form || !emailInput) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = emailInput.value.trim();
+    if (!email) return;
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span>Processando...</span>`;
+
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+
+      feedback.style.display = 'block';
+      if (data.success) {
+        soundManager.playScanBeep();
+        if (data.alreadySubscribed) {
+          feedback.className = 'subscribe-feedback already';
+          feedback.innerHTML = `ℹ️ ${data.message}`;
+        } else {
+          feedback.className = 'subscribe-feedback success';
+          feedback.innerHTML = `✅ ${data.message}`;
+          emailInput.value = '';
+        }
+      } else {
+        soundManager.playHazardAlert();
+        feedback.className = 'subscribe-feedback error';
+        feedback.innerHTML = `⚠️ ${data.error || 'Erro ao processar e-mail.'}`;
+      }
+    } catch {
+      feedback.style.display = 'block';
+      feedback.className = 'subscribe-feedback error';
+      feedback.innerHTML = `⚠️ Falha ao conectar ao observatório. Tente novamente em instantes.`;
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<span>Assinar Alertas</span><span class="btn-arrow">→</span>`;
+    }
+  });
+}
+
+// Tab Navigation (Planeta, Pôster, Inscrever-se)
+function setupTabNavigation() {
+  const tabBtns = document.querySelectorAll('.nav-tab-btn');
+  const viewSections = {
+    planet: document.getElementById('viewPlanet'),
+    poster: document.getElementById('viewPoster'),
+    subscribe: document.getElementById('viewSubscribe')
+  };
+
+  function switchTab(viewName) {
+    if (!viewSections[viewName]) viewName = 'planet';
+
+    // Update active tab buttons
+    tabBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.view === viewName);
+    });
+
+    // Toggle view visibility
+    Object.entries(viewSections).forEach(([key, el]) => {
+      if (el) {
+        el.style.display = (key === viewName) ? 'block' : 'none';
+      }
+    });
+
+    // Resize canvas if switching back to planet view
+    if (viewName === 'planet' && heroRenderer) {
+      setTimeout(() => heroRenderer.resizeCanvas(), 50);
+    }
+
+    // Keep URL hash in sync
+    if (window.location.hash !== `#${viewName}`) {
+      history.replaceState(null, '', `#${viewName}`);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.view));
+  });
+
+  // In-page navigation links
+  const btnGoToPoster = document.getElementById('btnGoToPoster');
+  if (btnGoToPoster) {
+    btnGoToPoster.addEventListener('click', () => switchTab('poster'));
+  }
+
+  const btnBackToPlanet = document.getElementById('btnBackToPlanet');
+  if (btnBackToPlanet) {
+    btnBackToPlanet.addEventListener('click', () => switchTab('planet'));
+  }
+
+  const btnSubscribeBackToPlanet = document.getElementById('btnSubscribeBackToPlanet');
+  if (btnSubscribeBackToPlanet) {
+    btnSubscribeBackToPlanet.addEventListener('click', () => switchTab('planet'));
+  }
+
+  // Initial tab from hash or default to planet
+  const initialHash = window.location.hash.replace('#', '');
+  if (['planet', 'poster', 'subscribe'].includes(initialHash)) {
+    switchTab(initialHash);
+  } else {
+    switchTab('planet');
+  }
+
+  window.addEventListener('hashchange', () => {
+    const hash = window.location.hash.replace('#', '');
+    if (['planet', 'poster', 'subscribe'].includes(hash)) {
+      switchTab(hash);
+    }
+  });
+}
+
+// Bind Event Listeners
+function bindEvents() {
+  simulateSurvivalBtn.addEventListener('click', simulateSurvival);
+  downloadPosterBtn.addEventListener('click', downloadPoster);
+  setupSubscribeForm();
+  setupTabNavigation();
+
+  soundToggleBtn.addEventListener('click', () => {
+    const active = soundManager.toggleSound();
+    soundIcon.textContent = active ? '🔊' : '🔇';
+    soundToggleBtn.classList.toggle('btn-accent', active);
+  });
+}
+
+// Launch application when DOM is ready
+document.addEventListener('DOMContentLoaded', initApp);

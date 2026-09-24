@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exoplanetas Extremos - Os Mundos Mais Mortais do Universo</title>
+  <meta name="description" content="Descubra a cada dia um exoplaneta extremo inédito. Explore o simulador 3D em monitor retrô e baixe o pôster colecionável estilo Comic Marvel A4 antes da meia-noite." />
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=JetBrains+Mono:ital,wght@0,400;0,600;0,800;1,400&family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Top Bar Navigation -->
+    <header class="app-header">
+      <div class="header-container">
+        <div class="logo-area">
+          <div class="logo-icon">🪐</div>
+          <div>
+            <h1 class="logo-title">EXOPLANETAS EXTREMOS</h1>
+            <p class="logo-tagline">Catálogo astronômico diário de mundos hostis no universo observável</p>
+          </div>
+        </div>
+
+        <!-- Navigation Tabs: Planeta, Pôster, Inscrever-se -->
+        <nav class="header-nav-tabs" aria-label="Navegação Principal">
+          <button class="nav-tab-btn active" data-view="planet" id="navTabPlanet">
+            <span class="tab-icon">🪐</span>
+            <span>Planeta</span>
+          </button>
+          <button class="nav-tab-btn" data-view="poster" id="navTabPoster">
+            <span class="tab-icon">🎨</span>
+            <span>Pôster</span>
+          </button>
+          <button class="nav-tab-btn" data-view="subscribe" id="navTabSubscribe">
+            <span class="tab-icon">📬</span>
+            <span>Inscrever-se</span>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-content">
+      <!-- Shared Edition Header Bar: Registro do Dia (Esquerda) e Próximo Mundo + Som (Direita) -->
+      <div class="edition-header-bar">
+        <div class="edition-bar-left">
+          <span class="edition-bar-label">REGISTRO DO DIA</span>
+          <span class="edition-bar-date" id="currentDateDisplay">--/--/----</span>
+        </div>
+
+        <div class="edition-bar-right">
+          <button id="soundToggleBtn" class="btn-sound-pill" title="Alternar efeitos sonoros sci-fi">
+            <span id="soundIcon">🔇</span> Som
+          </button>
+          <div class="daily-timer-pill" id="dailyTimerPill" title="Tempo restante até o próximo ciclo diário">
+            <span class="timer-dot"></span>
+            <span>Próximo mundo em: <strong id="countdownClock">--:--:--</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- VIEW 1: PLANETA DO DIA (Página Principal)  -->
+      <!-- ========================================== -->
+      <div class="view-page" id="viewPlanet">
+        <!-- Hero: Exoplaneta do Dia -->
+        <section class="hero-section" id="heroSection">
+          <div class="hero-grid">
+            <!-- Canvas 3D Viewport Retrô Monitor -->
+            <div class="viewport-card">
+              <div class="viewport-header">
+                <button class="view-mode-btn" id="sensorModeBadge" title="Alternar Sensor Térmico (Clique ou pressione CTRL ou T)">
+                  <span class="sensor-icon">📡</span>
+                  <span class="sensor-name">SENSOR 3D</span>
+                  <kbd class="ctrl-kbd">CTRL</kbd>
+                </button>
+                <span class="drag-hint">↻ Arraste para rotacionar</span>
+              </div>
+              
+              <div class="canvas-wrapper">
+                <canvas id="heroCanvas"></canvas>
+                <div class="scanlines-overlay"></div>
+                <span class="constellation-tag" id="heroConstellation" style="display: none;">--</span>
+              </div>
+
+              <div class="canvas-footer-status">
+                <span class="status-indicator">● TELEMETRIA ORBITAL ATIVA</span>
+                <span class="hud-coords">COORDENADAS: <strong id="heroCoordBadge">--</strong></span>
+              </div>
+            </div>
+
+            <!-- Hero Planet Info & Threat Meter -->
+            <div class="hero-info-card">
+              <div class="threat-header">
+                <span class="threat-score-pill" id="heroThreatScore">Nível de Hostilidade: 10.0 / 10</span>
+                <span class="category-badge" id="heroCategory">Classificação Hostil</span>
+              </div>
+
+              <h2 class="hero-planet-name" id="heroPlanetName">CARREGANDO DADOS...</h2>
+              <p class="hero-planet-title" id="heroPlanetTitle">Conectando ao catálogo estelar...</p>
+              
+              <p class="hero-planet-summary" id="heroPlanetSummary">
+                Sincronizando telemetria do exoplaneta do dia...
+              </p>
+
+              <!-- Quick Spec Grid -->
+              <div class="spec-grid">
+                <div class="spec-card">
+                  <span class="spec-label">Temperatura Superficial</span>
+                  <span class="spec-value" id="heroTemp">-- °C</span>
+                </div>
+                <div class="spec-card">
+                  <span class="spec-label">Distância da Terra</span>
+                  <span class="spec-value" id="heroDistance">-- ly</span>
+                </div>
+                <div class="spec-card">
+                  <span class="spec-label">Sobrevivência Humana</span>
+                  <span class="spec-value" id="heroSurvival">--</span>
+                </div>
+                <div class="spec-card">
+                  <span class="spec-label">Massa Relativa</span>
+                  <span class="spec-value" id="heroMass">--</span>
+                </div>
+              </div>
+
+              <!-- Interactive Survival Simulator Callout -->
+              <div class="survival-widget">
+                <div class="survival-widget-content">
+                  <h4>Simulação de Impacto Biológico:</h4>
+                  <p id="survivalNarrative">Calcule a reação do organismo humano nas condições deste ambiente.</p>
+                </div>
+                <button class="btn btn-survival" id="simulateSurvivalBtn">
+                  Simular Sobrevivência
+                </button>
+              </div>
+
+              <!-- NASA TAP API Live Status -->
+              <div class="nasa-status-banner" id="nasaStatusBanner">
+                <span class="nasa-dot"></span>
+                <span id="nasaStatusText">Sincronizando com NASA Exoplanet Archive...</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Detailed Dossier Section -->
+        <section class="dossier-section">
+          <div class="section-title-bar">
+            <div>
+              <h3 class="section-title">DOSSIÊ CIENTÍFICO</h3>
+              <p class="section-subtitle">Parâmetros astronômicos oficiais e análise de letalidade atmosférica</p>
+            </div>
+          </div>
+
+          <div class="dossier-grid">
+            <!-- Scientific Specs -->
+            <div class="dossier-card">
+              <h4>📋 Parâmetros Físicos e Orbitais</h4>
+              <ul class="specs-list" id="dossierSpecsList">
+                <!-- Dynamically populated -->
+              </ul>
+            </div>
+
+            <!-- Dynamics & Hazard Tags -->
+            <div class="dossier-card">
+              <h4>⚠️ Dinâmica Atmosférica & Fatores Críticos</h4>
+              <div class="hazard-tags-container" id="dossierHazardTags">
+                <!-- Hazard tags inserted dynamically -->
+              </div>
+              
+              <div class="horror-report-box">
+                <h5>Relatório Observacional:</h5>
+                <p id="dossierDescription">Carregando relatório...</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Callout Banner to Poster Page -->
+        <div class="view-poster-callout">
+          <div class="poster-callout-text">
+            <span class="callout-badge">🎨 ARTE EXCLUSIVA DISPONÍVEL</span>
+            <h4>Pôster Colecionável do Dia</h4>
+            <p>Acesse a aba exclusiva do pôster para admirar a capa no estilo quadrinhos vintage e baixar o arquivo oficial com certificado criptográfico.</p>
+          </div>
+          <button class="btn btn-accent" id="btnGoToPoster">
+            <span>Ver Pôster</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- VIEW 2: PÔSTER DEDICADO                    -->
+      <!-- ========================================== -->
+      <div class="view-page" id="viewPoster" style="display: none;">
+        <section class="comic-poster-section" id="posterSection">
+          <div class="poster-page-header">
+            <div class="poster-title-area">
+              <span class="poster-subtle-badge">ARTE DO DIA</span>
+              <h2 class="poster-page-title" id="posterPageTitle">PÔSTER • EXOPLANETA</h2>
+              <p class="poster-page-subtitle">
+                Capa original inspirada na era de ouro dos quadrinhos de ficção científica dos anos 70.
+                O arquivo para download traz certificado criptográfico de autenticidade (HMAC-SHA256) gravado silenciosamente nos metadados da imagem.
+              </p>
+            </div>
+            <div class="orientation-badge-container">
+              <span class="orientation-pill-discreet" id="posterOrientationPill">Formato Vertical</span>
+            </div>
+          </div>
+
+          <div class="comic-poster-container" id="comicPosterContainer">
+            <!-- Canvas or Preview of the Comic Poster -->
+            <div class="comic-poster-preview-card" id="comicPosterPreviewCard">
+              <div class="comic-loading-spinner" id="comicLoadingSpinner">
+                <span class="spinner-dot"></span>
+                <p>Renderizando pôster comemorativo em alta resolução...</p>
+              </div>
+              <img id="comicPosterImg" alt="Capa de Quadrinhos do Exoplaneta Extremo do Dia" style="display: none;" />
+            </div>
+
+            <!-- Download Action Controls -->
+            <div class="comic-download-actions">
+              <button class="btn btn-comic-download" id="downloadPosterBtn" disabled>
+                Baixar Pôster Oficial (PNG)
+              </button>
+              <p class="download-hint">
+                Arquivo em alta definição para impressão ou papel de parede, com certificado e assinatura HMAC-SHA256 embutidos.
+              </p>
+              <div class="poster-back-nav">
+                <button class="btn btn-outline" id="btnBackToPlanet">
+                  ← Voltar ao Planeta
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- VIEW 3: INSCREVER-SE (Página Separada)     -->
+      <!-- ========================================== -->
+      <div class="view-page" id="viewSubscribe" style="display: none;">
+        <section class="subscribe-section" id="subscribeSection">
+          <div class="subscribe-card">
+            <div class="subscribe-badge">📬 NOTIFICAÇÕES DIÁRIAS</div>
+            <h2 class="subscribe-title">Inscrever-se para os Drops</h2>
+            
+            <div class="subscribe-letter">
+              <p><strong>Antes de se inscrever:</strong> Este é um observatório astronômico e projeto artístico independente. Nós não enviamos spam, newsletters intermináveis ou e-mails de marketing.</p>
+              <p>Tudo o que você receberá é um aviso no momento em que um novo exoplaneta extremo for catalogado (a cada 24 horas), com o link direto para explorar a telemetria 3D e baixar o pôster colecionável antes que ele seja lacrado no banco de dados à meia-noite.</p>
+              <p>Você pode cancelar a sua inscrição a qualquer momento com apenas 1 clique. Seu e-mail fica guardado em nosso banco de dados seguro e jamais será compartilhado com ninguém.</p>
+            </div>
+
+            <form id="subscribeForm" class="subscribe-form">
+              <div class="subscribe-input-group">
+                <label for="subscribeEmail" class="subscribe-label">Endereço de E-mail *</label>
+                <div class="subscribe-field-row">
+                  <input 
+                    type="email" 
+                    id="subscribeEmail" 
+                    class="subscribe-input" 
+                    placeholder="seu-email@dominio.com" 
+                    required 
+                    autocomplete="email"
+                  />
+                  <button type="submit" id="subscribeBtn" class="btn btn-subscribe">
+                    <span>Assinar Alertas</span>
+                    <span class="btn-arrow">→</span>
+                  </button>
+                </div>
+              </div>
+              <div id="subscribeFeedback" class="subscribe-feedback" style="display: none;"></div>
+            </form>
+
+            <div class="subscribe-signoff">
+              <p>Um abraço cósmico,</p>
+              <strong class="signoff-name">Lucas Gomes</strong>
+              <span class="signoff-role">Desenvolvedor &bull; github.com/luckhaosbb</span>
+            </div>
+
+            <div class="subscribe-back-nav">
+              <button class="btn btn-outline" id="btnSubscribeBackToPlanet">
+                ← Voltar ao Planeta
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Footer with Developer Social Links (Lucas Gomes) & Credits -->
+    <footer class="app-footer">
+      <div class="footer-container">
+        <div class="footer-profile-card">
+          <div class="profile-info">
+            <h4 class="profile-name">Criado por Lucas Gomes</h4>
+            <p class="profile-tagline">Desenvolvedor Web & Entusiasta de Astronomia, Sci-Fi e Quadrinhos</p>
+          </div>
+
+          <!-- Social Contact Links -->
+          <div class="profile-social-links">
+            <a href="https://github.com/luckhaosbb" target="_blank" rel="noopener noreferrer" class="social-btn github-btn" title="GitHub de Lucas Gomes">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+              </svg>
+              <span>GitHub</span>
+            </a>
+
+            <a href="https://www.linkedin.com/in/lucas-gomes-ab49582bb" target="_blank" rel="noopener noreferrer" class="social-btn linkedin-btn" title="LinkedIn de Lucas Gomes">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+              </svg>
+              <span>LinkedIn</span>
+            </a>
+
+            <a href="https://wa.me/5585997893548" target="_blank" rel="noopener noreferrer" class="social-btn whatsapp-btn" title="Conversar no WhatsApp">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12.031 0C5.394 0 .017 5.377.017 12.015c0 2.118.552 4.184 1.599 6.002L.03 24l6.143-1.613c1.75 0.954 3.73 1.458 5.858 1.458h.005c6.634 0 12.01-5.377 12.01-12.015A12.01 12.01 0 0 0 12.031 0zm-.005 21.84h-.004c-1.79 0-3.548-.482-5.086-1.396l-.365-.216-3.778.991 1.008-3.684-.237-.378a9.98 9.98 0 0 1-1.533-5.142c0-5.524 4.496-10.02 10.025-10.02 2.677 0 5.195 1.043 7.088 2.937a9.97 9.97 0 0 1 2.937 7.088c0 5.525-4.496 10.02-10.025 10.02zm5.494-7.5c-.301-.151-1.782-.88-2.058-.98-.276-.1-.476-.15-.677.151-.201.301-.778.98-.954 1.18-.175.201-.351.226-.652.076-.301-.151-1.272-.469-2.423-1.496-.895-.798-1.5-1.784-1.675-2.085-.175-.301-.019-.464.132-.614.136-.135.301-.351.452-.527.151-.176.201-.301.301-.502.101-.201.05-.377-.025-.527-.075-.151-.677-1.633-.928-2.236-.244-.588-.492-.508-.677-.518l-.577-.01c-.201 0-.527.075-.803.376s-1.054 1.03-1.054 2.512 1.079 2.913 1.23 3.114c.151.201 2.124 3.243 5.146 4.549.719.311 1.28.497 1.718.636.722.23 1.378.197 1.898.12.58-.087 1.782-.728 2.033-1.431.251-.703.251-1.305.176-1.431-.076-.126-.276-.201-.577-.352z"/>
+              </svg>
+              <span>WhatsApp</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="footer-credits">
+          <p>
+            ✨ <strong>Exoplanetas Extremos</strong> &bull; Homenagem ao projeto <a href="https://science.nasa.gov/exoplanets/immersive/galaxy-of-horrors/" target="_blank" rel="noopener">Galaxy of Horrors da NASA</a> &bull; Dados científicos sincronizados via <a href="https://exoplanetarchive.ipac.caltech.edu/" target="_blank" rel="noopener">NASA Exoplanet Archive TAP API</a>
+          </p>
+          <p class="footer-sub">
+            Todos os direitos do conceito preservados &bull; Drop diário ininterrupto com persistência em banco de dados.
+          </p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
