@@ -367,6 +367,57 @@
                 ← Voltar ao Planeta
               </button>
             </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- VIEW 4: CURADORIA SEMANAL (Exclusivo Autor)-->
+      <!-- ========================================== -->
+      <div class="view-page" id="viewCuradoria" style="display: none;">
+        <section class="curadoria-section" id="curadoriaSection">
+          <div class="curadoria-header">
+            <div class="curadoria-badge-row">
+              <span class="badge-status-gold">🛰️ OBSERVATÓRIO DO AUTOR</span>
+              <span class="badge-status-pulsing">GRADE DE CURADORIA SEMANAL</span>
+            </div>
+            <h2 class="curadoria-title">PAINEL DE CURADORIA SEMANAL</h2>
+            <p class="curadoria-subtitle">
+              Inspeção antecipada dos 7 exoplanetas da primeira semana.
+              Os pôsteres abaixo são gerados pelo motor oficial com a numeração sequencial de <strong>ISSUE</strong>, a plaqueta amarela e o selo cósmico da NASA.
+            </p>
+          </div>
+
+          <!-- Grade Seletora dos 7 Dias da Semana -->
+          <div class="curadoria-week-grid" id="curadoriaWeekGrid">
+            <!-- Cards dos 7 dias inseridos dinamicamente -->
+          </div>
+
+          <!-- Área de Exibição do Pôster em Destaque -->
+          <div class="curadoria-preview-stage" id="curadoriaPreviewStage">
+            <div class="stage-info-header">
+              <div class="stage-planet-details">
+                <div class="stage-badges-row">
+                  <span class="stage-day-badge" id="stageDayBadge">Segunda-feira</span>
+                  <span class="stage-issue-badge" id="stageIssueBadge">ISSUE #001</span>
+                  <span class="stage-orientation-badge" id="stageOrientationBadge">Vertical A4</span>
+                </div>
+                <h3 class="stage-planet-name" id="stagePlanetName">HD 189733b</h3>
+                <p class="stage-planet-title" id="stagePlanetTitle">THE RAZOR RAIN HORROR</p>
+              </div>
+              <div class="stage-actions">
+                <button class="btn btn-comic-download" id="stageDownloadBtn">
+                  <span>Baixar Pôster A4 Oficial (PNG)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Canvas Renderizado do Pôster Oficial -->
+            <div class="curadoria-poster-canvas-box" id="curadoriaPosterBox">
+              <div class="comic-loading-spinner" id="curadoriaSpinner">
+                <span class="spinner-dot"></span>
+                <p>Renderizando pôster oficial com selos e tipografia...</p>
+              </div>
+              <img id="curadoriaPosterImg" alt="Pôster Oficial da Coleção" style="display: none;" />
+            </div>
           </div>
         </section>
       </div>

@@ -19,4 +19,7 @@ router.post('/subscribe', subscriberController.subscribe);
 // Rota de Reinicialização Segura do Catálogo
 router.all('/reset-planets', planetController.resetPlanets);
 
+// Rota de Curadoria Semanal do Autor (Grade de Produção)
+router.get('/curadoria', planetController.getCuradoria);
+
 export default router;

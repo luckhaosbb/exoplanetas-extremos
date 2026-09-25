@@ -95,5 +95,59 @@ export const planetController = {
     } catch (error) {
       return res.status(500).json({ success: false, error: error.message });
     }
+  },
+
+  /**
+   * GET /api/curadoria
+   * Retorna os 7 exoplanetas da semana com numeração sequencial de issues,
+   * datas programadas e status das imagens para a curadoria do autor.
+   */
+  async getCuradoria(req, res) {
+    try {
+      const { EXOPLANETS_CATALOG } = await import('../data/exoplanets.js');
+      const fs = await import('fs');
+      const path = await import('path');
+      const { fileURLToPath } = await import('url');
+
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = path.dirname(__filename);
+      const planetsAssetDir = path.join(__dirname, '..', '..', 'public', 'assets', 'planets');
+
+      const daysOfWeek = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'];
+      const weekPlanets = EXOPLANETS_CATALOG.slice(0, 7).map((planet, idx) => {
+        const issueNum = idx + 1;
+        const imgFileName = `${planet.id}.jpg`;
+        const imgFullPath = path.join(planetsAssetDir, imgFileName);
+        const hasImage = fs.existsSync(imgFullPath);
+
+        const d = new Date();
+        d.setDate(d.getDate() + idx);
+        const dateStr = d.toISOString().slice(0, 10);
+
+        return {
+          issueNumber: issueNum,
+          issueLabel: `ISSUE #${String(issueNum).padStart(3, '0')}`,
+          dayName: daysOfWeek[idx] || `Dia ${idx + 1}`,
+          scheduledDate: dateStr,
+          hasArtwork: hasImage,
+          artworkUrl: `/assets/planets/${imgFileName}`,
+          planet: {
+            ...planet,
+            issueNumber: issueNum,
+            bannerOrientation: planet.bannerOrientation || 'vertical'
+          }
+        };
+      });
+
+      return res.json({
+        success: true,
+        totalScheduled: weekPlanets.length,
+        weekSchedule: weekPlanets,
+        serverTimestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('❌ Erro no endpoint de curadoria:', error);
+      return res.status(500).json({ success: false, error: 'Falha ao recuperar grade de curadoria.' });
+    }
   }
 };

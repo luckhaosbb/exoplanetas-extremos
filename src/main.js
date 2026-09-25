@@ -406,7 +406,8 @@ function setupTabNavigation() {
   const viewSections = {
     planet: document.getElementById('viewPlanet'),
     poster: document.getElementById('viewPoster'),
-    subscribe: document.getElementById('viewSubscribe')
+    subscribe: document.getElementById('viewSubscribe'),
+    curadoria: document.getElementById('viewCuradoria')
   };
 
   function switchTab(viewName, updateUrl = true) {
@@ -427,6 +428,11 @@ function setupTabNavigation() {
     // Resize canvas if switching back to planet view
     if (viewName === 'planet' && heroRenderer) {
       setTimeout(() => heroRenderer.resizeCanvas(), 50);
+    }
+
+    // Se mudou para a curadoria, carrega a grade e os pôsteres
+    if (viewName === 'curadoria') {
+      loadCuradoriaDashboard();
     }
 
     // Keep URL hash in sync only if requested
@@ -459,9 +465,9 @@ function setupTabNavigation() {
   }
 
   // Initial tab from hash:
-  // Se o usuário acessou diretamente com hash (#poster, #subscribe, #planet)
+  // Se o usuário acessou diretamente com hash (#poster, #subscribe, #planet, #curadoria)
   const initialHash = window.location.hash.replace('#', '');
-  if (['poster', 'subscribe'].includes(initialHash)) {
+  if (['poster', 'subscribe', 'curadoria'].includes(initialHash)) {
     switchTab(initialHash, false);
   } else if (initialHash === 'planet') {
     switchTab('planet', false);
@@ -475,12 +481,127 @@ function setupTabNavigation() {
 
   window.addEventListener('hashchange', () => {
     const hash = window.location.hash.replace('#', '');
-    if (['planet', 'poster', 'subscribe'].includes(hash)) {
+    if (['planet', 'poster', 'subscribe', 'curadoria'].includes(hash)) {
       switchTab(hash, false);
     } else {
       switchTab('planet', false);
     }
   });
+}
+
+// -------------------------------------------------------------
+// Painel do Autor / Curadoria Semanal
+// -------------------------------------------------------------
+let curadoriaData = null;
+let selectedCuradoriaPlanet = null;
+let currentCuradoriaPosterUrl = null;
+
+async function loadCuradoriaDashboard() {
+  const grid = document.getElementById('curadoriaWeekGrid');
+  if (!grid) return;
+
+  try {
+    if (!curadoriaData) {
+      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 1.5rem;">Carregando grade semanal oficial...</div>`;
+      const res = await fetch('/api/curadoria');
+      const data = await res.json();
+      if (!data.success || !data.weekSchedule) throw new Error('Falha ao obter curadoria');
+      curadoriaData = data.weekSchedule;
+    }
+
+    renderCuradoriaGrid(curadoriaData);
+
+    // Seleciona o primeiro planeta por padrão se nenhum estiver selecionado
+    if (!selectedCuradoriaPlanet && curadoriaData.length > 0) {
+      selectCuradoriaPlanet(curadoriaData[0]);
+    }
+  } catch (err) {
+    console.error('Erro na curadoria:', err);
+    grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--accent-red); padding: 1.5rem;">Falha ao carregar grade do observatório.</div>`;
+  }
+}
+
+function renderCuradoriaGrid(schedule) {
+  const grid = document.getElementById('curadoriaWeekGrid');
+  if (!grid) return;
+
+  grid.innerHTML = '';
+  schedule.forEach((item) => {
+    const card = document.createElement('div');
+    const isSelected = selectedCuradoriaPlanet && selectedCuradoriaPlanet.issueNumber === item.issueNumber;
+    card.className = `curadoria-day-card ${isSelected ? 'active' : ''}`;
+    card.innerHTML = `
+      <span class="curadoria-card-dayname">${item.dayName.split('-')[0]}</span>
+      <span class="curadoria-card-issue">${item.issueLabel}</span>
+      <h4 class="curadoria-card-planetname">${item.planet.name}</h4>
+      <span class="curadoria-card-status ${item.hasArtwork ? 'ready' : 'pending'}">
+        ${item.hasArtwork ? '● Arte Pronta' : '○ Aguardando'}
+      </span>
+    `;
+
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.curadoria-day-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      selectCuradoriaPlanet(item);
+    });
+
+    grid.appendChild(card);
+  });
+}
+
+async function selectCuradoriaPlanet(item) {
+  selectedCuradoriaPlanet = item;
+  const p = item.planet;
+
+  // Atualiza cabeçalho do stage
+  const stageDayBadge = document.getElementById('stageDayBadge');
+  const stageIssueBadge = document.getElementById('stageIssueBadge');
+  const stageOrientationBadge = document.getElementById('stageOrientationBadge');
+  const stagePlanetName = document.getElementById('stagePlanetName');
+  const stagePlanetTitle = document.getElementById('stagePlanetTitle');
+  const spinner = document.getElementById('curadoriaSpinner');
+  const img = document.getElementById('curadoriaPosterImg');
+  const downloadBtn = document.getElementById('stageDownloadBtn');
+
+  if (stageDayBadge) stageDayBadge.textContent = `${item.dayName} • ${item.scheduledDate}`;
+  if (stageIssueBadge) stageIssueBadge.textContent = item.issueLabel;
+  if (stageOrientationBadge) stageOrientationBadge.textContent = p.bannerOrientation === 'horizontal' ? 'Horizontal A4' : 'Vertical A4';
+  if (stagePlanetName) stagePlanetName.textContent = p.name;
+  if (stagePlanetTitle) stagePlanetTitle.textContent = (p.comicHeroTitle || p.title).toUpperCase();
+
+  if (spinner) spinner.style.display = 'block';
+  if (img) img.style.display = 'none';
+  if (downloadBtn) downloadBtn.disabled = true;
+
+  try {
+    // Renderiza o pôster com o gerador oficial da aplicação
+    const generator = new ComicBannerGenerator(p, p.bannerOrientation);
+    currentCuradoriaPosterUrl = await generator.generatePoster();
+
+    if (spinner) spinner.style.display = 'none';
+    if (img) {
+      img.src = currentCuradoriaPosterUrl;
+      img.style.display = 'block';
+    }
+    if (downloadBtn) {
+      downloadBtn.disabled = false;
+      downloadBtn.onclick = () => {
+        soundManager.playScanBeep();
+        const link = document.createElement('a');
+        const cleanName = p.name.replace(/\s+/g, '-').toUpperCase();
+        link.download = `COLECAO-${item.issueLabel}-${cleanName}-POSTER-A4.png`;
+        link.href = currentCuradoriaPosterUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      };
+    }
+  } catch (err) {
+    console.error('Erro ao renderizar banner na curadoria:', err);
+    if (spinner) {
+      spinner.innerHTML = `<p style="color: var(--accent-red)">Erro ao processar arte do pôster.</p>`;
+    }
+  }
 }
 
 // Bind Event Listeners
