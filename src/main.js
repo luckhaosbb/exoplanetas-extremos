@@ -518,6 +518,9 @@ function setupTabNavigation() {
   const initialHash = window.location.hash.replace('#', '').toLowerCase();
 
   if (isCurator && secretRequested) {
+    if (window.location.hash) {
+      history.replaceState(null, '', `?secret=${SECRET_CURATOR_TOKEN}`);
+    }
     switchTab('curadoria', false);
   } else if (initialHash === 'poster') {
     switchTab('poster', false);

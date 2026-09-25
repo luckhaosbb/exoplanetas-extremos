@@ -1,4 +1,5 @@
 import { planetService } from '../services/planetService.js';
+import { config } from '../config/index.js';
 
 /**
  * Controller responsável por orquestrar as requisições HTTP
