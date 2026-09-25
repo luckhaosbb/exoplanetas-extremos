@@ -1,4 +1,4 @@
-# 🪐 Exoplanetas Extremos (Daily Extreme Exoplanets)
+# 🪐 Extreme Exoplanets (Daily Extreme Exoplanet Archive)
 
 [![Node.js](https://img.shields.io/badge/Node.js-v20+-green.svg?style=flat-square&logo=node.js)](https://nodejs.org/)
 [![Express.js](https://img.shields.io/badge/Express-4.21-lightgrey.svg?style=flat-square&logo=express)](https://expressjs.com/)
@@ -7,122 +7,126 @@
 [![Architecture](https://img.shields.io/badge/Architecture-SOLID%20Clean%20Design-blueviolet.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
 
-> **"No espaço, ninguém pode ouvir você queimar, ser estraçalhado por vidro supersônico ou evaporar em chuva de ferro."**  
-> *Uma experiência interativa com estética sci-fi retrofuturista, inspirada no acervo "Galaxy of Horrors" da NASA e na Era de Ouro dos Quadrinhos.*
+> **"In space, no one can hear you burn, get shredded by supersonic glass, or evaporate in iron rain."**  
+> *An interactive experience featuring retro-futuristic sci-fi aesthetics, inspired by NASA's "Galaxy of Horrors" and the Golden Age of Comic Books.*
 
 ---
 
-## 🌌 Visão Geral
+## 🌌 Overview
 
-O **Exoplanetas Extremos** é uma aplicação web full-stack desenvolvida sob padrões corporativos de engenharia de software e análise de sistemas sênior. O sistema disponibiliza **um único exoplaneta mortal a cada 24 horas** em regime de *Daily Drop*, garantindo um ciclo de rotação diário sem repetições até a exaustão do catálogo astronômico.
+**Extreme Exoplanets** is a full-stack web application designed with enterprise-grade software engineering standards and senior systems design principles. The platform delivers **one deadly exoplanet every 24 hours** in an automated *Daily Drop* schedule, guaranteeing a non-repeating astronomical rotation cycle until catalog exhaustion.
 
-### Principais Funcionalidades:
-1. **Sensor Telemétrico 3D (Estética CRT Retrofuturista):** Renderizador interativo de física esférica com inércia angular amortecida, iluminação tridimensional, scanlines e marcas de relevo atmosférico exclusivas para cada planeta (chuva de silicato a Mach 7, plasma solar, tempestades de ferro derretido, etc.).
-2. **Pôster Comic Book A4 (300 DPI):** Gerador visual de capas clássicas de quadrinhos *vintage*, integrando automaticamente a numeração sequencial da edição (`ISSUE #001`, `ISSUE #002`), tipografia autoral em relevo, retículas Ben-Day e carimbo de aprovação cósmica.
-3. **Chave Criptográfica Invisível (NFT-like Provenance):** Injeção de metadados binários oficiais W3C (`tEXt` chunks com verificação de integridade CRC-32) diretamente no fluxo do arquivo PNG gerado. A assinatura digital utiliza **HMAC-SHA256** no servidor, garantindo autenticidade imutável e verificável através do endpoint `/api/verify-token`.
-4. **Assinatura Diária (Estilo Tyler Vigen):** Newsletter minimalista e livre de distrações para alerta de novos drops astronômicos.
-5. **Integração Científica ao Vivo:** Conexão assíncrona com a API TAP do *NASA Exoplanet Archive* para validação de métricas de catálogo em tempo real.
+### Core Features:
+1. **3D Telemetry CRT Sensor (Retro-futuristic Aesthetic):** Interactive spherical physics renderer with damped angular inertia, 3D dynamic lighting, scanlines, and custom atmospheric relief shaders unique to each world (Mach 7 silicate rain, stellar plasma, molten iron deluges, etc.).
+2. **Vintage Comic Book A4 Poster (300 DPI):** Procedural artwork generator delivering classic vintage comic covers, automatically stamping issue sequencing (`ISSUE #001`, `ISSUE #002`), embossed bespoke typography, Ben-Day halftone grids, and cosmic approval stamps.
+3. **Invisible Cryptographic Watermark (NFT-like Provenance):** W3C standard binary chunk injection (`tEXt` chunks with CRC-32 integrity validation) directly into the generated PNG file stream. Server-side digital signatures utilize **HMAC-SHA256**, ensuring immutable and verifiable authenticity via the `/api/verify-token` endpoint.
+4. **Daily Tyler Vigen-Style Notifications:** Minimalist, distraction-free newsletter alert system for upcoming daily drops.
+5. **Live Scientific Telemetry:** Asynchronous synchronization with NASA's TAP Exoplanet Archive API for real-time astronomical verification.
 
 ---
 
-## 🏛️ Arquitetura de Software & Princípios SOLID
+## 🏛️ Software Architecture & SOLID Principles
 
-O backend foi integralmente refatorado seguindo **Arquitetura em Camadas (Layered Clean Architecture)** e os cinco princípios **SOLID**:
+The backend is built following **Layered Clean Architecture** and strictly adheres to the five **SOLID** principles:
 
 ```
 server/
-├── config/                  # Centralização e tipagem de variáveis de ambiente
+├── config/                  # Centralized typed environment configurations
 │   └── index.js
-├── data/                    # Catálogo astronômico e armazenamento resiliente local
+├── data/                    # Astronomical catalog and resilient local storage
 │   ├── exoplanets.js
 │   ├── published_planets.json
 │   └── subscribers.json
-├── repositories/            # Camada de Persistência (Data Access Layer)
-│   ├── database.js          # Connection Pool do PostgreSQL com DDL auto-migrável
-│   ├── planetRepository.js  # Abstração de queries/mutações de exoplanetas
-│   └── subscriberRepository.js # Abstração de queries/mutações de assinantes
-├── services/                # Camada de Regras de Negócio (Business Logic Layer)
-│   ├── cryptoService.js     # Geração e validação de assinaturas HMAC-SHA256
-│   ├── planetService.js     # Orquestração do ciclo diário e seleção sem repetição
-│   └── subscriberService.js # Validação RFC e saneamento de assinaturas
-├── controllers/             # Camada de Apresentação HTTP (API Controllers)
+├── repositories/            # Data Access Layer (Persistence)
+│   ├── database.js          # PostgreSQL Connection Pool with auto-migrating DDL
+│   ├── planetRepository.js  # Exoplanet queries and mutations abstraction
+│   └── subscriberRepository.js # Subscriber queries and mutations abstraction
+├── services/                # Business Logic Layer
+│   ├── cryptoService.js     # HMAC-SHA256 signature generation and validation
+│   ├── planetService.js     # Daily drop rotation orchestration without repetition
+│   └── subscriberService.js # RFC email validation and subscription sanitization
+├── controllers/             # Presentation Layer (HTTP API Controllers)
 │   ├── cryptoController.js
 │   ├── planetController.js
 │   └── subscriberController.js
-├── routes/                  # Roteamento desacoplado
+├── routes/                  # Decoupled Express routing
 │   └── api.js
-└── server.js                # Bootstrap do Express e fallback SPA estático
+└── server.js                # Express bootstrap, security middlewares, and SPA static hosting
 ```
 
-### Como os Princípios SOLID são Aplicados:
-- **S - Single Responsibility Principle (SRP):** Cada serviço e repositório possui uma única responsabilidade de domínio bem delineada. O `cryptoService` manipula apenas integridade criptográfica, enquanto `planetService` orquestra regras de publicação e rotação.
-- **O - Open/Closed Principle (OCP):** A camada de repositórios permite estender provedores de banco de dados (ex: migrar para MongoDB ou DynamoDB) sem necessidade de alterar as regras de negócio dos serviços.
-- **L - Liskov Substitution Principle (LSP):** O repositório unificado garante os mesmos contratos de dados seja executando em PostgreSQL de nuvem ou em JSON persistente local.
-- **I - Interface Segregation Principle (ISP):** Repositórios e controladores possuem contratos enxutos, expondo estritamente as operações necessárias.
-- **D - Dependency Inversion Principle (DIP):** Os controladores dependem dos serviços, e os serviços dependem das abstrações de repositórios, nunca acessando o driver do banco ou o sistema de arquivos diretamente.
+### How SOLID Principles are Implemented:
+- **S - Single Responsibility Principle (SRP):** Each service and repository possesses a single, well-defined domain responsibility. `cryptoService` handles solely cryptographic integrity, while `planetService` orchestrates publication rules and daily rotations.
+- **O - Open/Closed Principle (OCP):** The repository layer enables extending database providers (e.g., migrating to MongoDB or DynamoDB) without altering core business rules in the service layer.
+- **L - Liskov Substitution Principle (LSP):** The unified repository contract behaves identically whether connecting to cloud PostgreSQL or falling back to local persistent JSON storage.
+- **I - Interface Segregation Principle (ISP):** Repositories and controllers maintain lean, specialized contracts exposing strictly necessary domain methods.
+- **D - Dependency Inversion Principle (DIP):** Controllers depend on service abstractions, and services depend on repository interfaces, completely decoupling business logic from direct database drivers or filesystem APIs.
 
 ---
 
-## 🐘 Persistência de Dados Dual-Engine
+## 🐘 Dual-Engine Data Persistence
 
-O projeto adota uma estratégia de **resiliência híbrida**:
-- **PostgreSQL (Nuvem / Produção):** Ativado automaticamente quando a variável de ambiente `DATABASE_URL` está preenchida (ex: no Render, Supabase, Neon ou AWS RDS). As tabelas (`published_planets` e `subscribers`) são criadas de forma idempotente na inicialização.
-- **JSON Engine (Desenvolvimento Local Zero-Config):** Se `DATABASE_URL` não for informada, o sistema aciona transparentemente o fallback em arquivos JSON persistentes em `server/data/`, eliminando a obrigatoriedade de inicializar containers Docker para testes locais ou acadêmicos.
+The application employs a **hybrid resilience architecture**:
+- **PostgreSQL (Cloud / Production):** Automatically initialized whenever `DATABASE_URL` is configured (e.g., Supabase, Neon, AWS RDS, or Render). Schema migrations for tables (`published_planets` and `subscribers`) execute idempotently on startup.
+- **JSON Engine (Zero-Config Local Development):** If `DATABASE_URL` is omitted, the system seamlessly activates persistent JSON storage inside `server/data/`, eliminating the requirement of Docker containers for local testing or academic evaluations.
 
 ---
 
-## 🔐 Especificação Criptográfica do Pôster
+## 🔐 Cryptographic Poster Specification
 
-Ao gerar o download do pôster A4 em PNG, o motor injeta chunks binários padronizados antes do terminador `IEND`:
+When generating the A4 PNG poster download, the generator injects standardized binary chunks immediately preceding the `IEND` marker:
 
-| Propriedade no PNG | Descrição |
+| PNG Chunk Key | Description |
 | :--- | :--- |
-| `NFT_Token_ID` | Identificador único de série (`TOKEN#EXO-YYYYMMDD-XXXXXX`) |
-| `HMAC_Signature` | Assinatura digital calculada no servidor com chave privada secreta |
-| `Exoplanet_ID` | Código identificador astronômico (ex: `hd-189733b`) |
-| `Drop_Date` | Data oficial do drop (`YYYY-MM-DD`) |
-| `Authenticity` | Declaração oficial de proveniência |
+| `NFT_Token_ID` | Unique drop series identifier (`TOKEN#EXO-YYYYMMDD-XXXXXX`) |
+| `HMAC_Signature` | Cryptographic signature computed on the server using private key |
+| `Exoplanet_ID` | Astronomical catalog identifier (e.g., `hd-189733b`) |
+| `Drop_Date` | Official drop date timestamp (`YYYY-MM-DD`) |
+| `Authenticity` | Official statement of digital provenance |
 | `Developer` | Lucas Gomes (github.com/luckhaosbb) |
 
 ---
 
-## 🚀 Como Executar o Projeto
+## 🚀 Getting Started
 
-### Pré-requisitos
-- [Node.js](https://nodejs.org/) versão 18+ (recomendado LTS)
-- Gerenciador de pacotes `npm`
+### Prerequisites
+- [Node.js](https://nodejs.org/) v18+ (LTS recommended)
+- `npm` package manager
 
-### Instalação
+### Installation
 ```bash
-# 1. Clonar o repositório
+# 1. Clone repository
 git clone https://github.com/luckhaosbb/exoplanetas-extremos.git
 cd exoplanetas-extremos
 
-# 2. Instalar as dependências do projeto
+# 2. Install dependencies
 npm install
 ```
 
-### Configuração de Variáveis de Ambiente
-Copie o arquivo de exemplo para criar o `.env`:
+### Environment Configuration
+Create a `.env` file from the provided template:
 ```bash
 cp .env.example .env
 ```
-Campos disponíveis:
+
+Available configuration keys:
 ```env
 PORT=3001
 NODE_ENV=development
-SERVER_SECRET_KEY=sua_chave_secreta_aqui
+SERVER_SECRET_KEY=your_secret_crypto_key_here
 DATABASE_URL=
+COMING_SOON=true
+LAUNCH_DATE=2026-09-25
+CURADORIA_SECRET=obs_k7x9m2_luckhaos
 ```
-*(Nota: Para execução local rápida, mantenha `DATABASE_URL` vazia).*
+*(Note: For quick local development, leave `DATABASE_URL` empty to utilize the zero-config JSON engine).*
 
-### Executando em Desenvolvimento
+### Running in Development
 ```bash
 npm run dev
 ```
-O comando iniciará simultaneamente o servidor backend Express (porta `3001`) e o Vite frontend com HMR (porta `5173`).
+Launches both the Express backend server (port `3001`) and the Vite frontend with Hot Module Replacement (port `5173`).
 
-### Compilação e Execução de Produção
+### Production Build & Execution
 ```bash
 npm run build
 npm start
@@ -130,24 +134,8 @@ npm start
 
 ---
 
-## 🌐 Deploy em Produção (Render.com)
+## 👨‍💻 Author
 
-1. Crie uma conta no [Render](https://render.com/).
-2. Conecte o repositório GitHub `luckhaosbb/exoplanetas-extremos`.
-3. Escolha a opção **Web Service** com as seguintes definições:
-   - **Environment:** `Node`
-   - **Build Command:** `npm install && npm run build`
-   - **Start Command:** `npm start`
-4. Na aba **Environment Variables**, adicione:
-   - `NODE_ENV`: `production`
-   - `SERVER_SECRET_KEY`: *[Chave aleatória gerada para assinatura]*
-   - `DATABASE_URL`: *[URL da instância PostgreSQL no Render]*
-5. Configure seu domínio customizado (`luckhaosbb.dev` ou `exoplanetas.luckhaosbb.dev`) apontando os registros CNAME/A no seu provedor de DNS conforme fornecido pelo painel do Render.
-
----
-
-## 👨‍💻 Autor
-
-Desenvolvido por **Lucas Gomes**  
+Crafted by **Lucas Gomes**  
 - GitHub: [@luckhaosbb](https://github.com/luckhaosbb)  
 - Website: [luckhaosbb.dev](https://luckhaosbb.dev)

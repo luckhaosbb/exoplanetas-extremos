@@ -10,5 +10,7 @@ export const config = {
   isProduction: process.env.NODE_ENV === 'production',
   // Modo de pré-estreia (Em Breve) ativado por padrão até o usuário definir COMING_SOON=false
   comingSoon: process.env.COMING_SOON !== 'false',
-  launchDate: process.env.LAUNCH_DATE || '2026-09-25'
+  launchDate: process.env.LAUNCH_DATE || '2026-09-25',
+  // Chave secreta de autenticação do Painel do Autor / Curadoria
+  curadoriaSecret: process.env.CURADORIA_SECRET || 'obs_k7x9m2_luckhaos'
 };

@@ -79,9 +79,20 @@ export class ComicBannerGenerator {
   loadImage(src) {
     return new Promise((resolve) => {
       const img = new Image();
-      img.crossOrigin = 'anonymous';
+      if (src.startsWith('http')) {
+        img.crossOrigin = 'anonymous';
+      }
       img.onload = () => resolve(img);
-      img.onerror = () => resolve(null);
+      img.onerror = () => {
+        if (img.crossOrigin) {
+          const fallbackImg = new Image();
+          fallbackImg.onload = () => resolve(fallbackImg);
+          fallbackImg.onerror = () => resolve(null);
+          fallbackImg.src = src;
+        } else {
+          resolve(null);
+        }
+      };
       img.src = src;
     });
   }
@@ -175,7 +186,7 @@ export class ComicBannerGenerator {
   }
 
   // Gera a arte completa e retorna a DataURL em PNG com os metadados criptográficos embutidos
-  async generatePoster() {
+  async generatePoster(forPreview = false) {
     const ctx = this.ctx;
     const w = this.width;
     const h = this.height;
@@ -216,8 +227,13 @@ export class ComicBannerGenerator {
       this.drawComicTitle(ctx, w, h, isHoriz);
     }
 
-    // 7. Textura e Vinheta de Papel Vintage
+    // 8. Textura e Vinheta de Papel Vintage
     this.drawVintagePaperVignette(ctx, w, h);
+
+    // Prévia imediata e ultrarrápida na tela sem sobrecarregar a thread principal
+    if (forPreview) {
+      return this.canvas.toDataURL('image/jpeg', 0.92);
+    }
 
     // Exporta imagem bruta e injeta a chave criptográfica nos metadados binários do PNG
     const rawDataUrl = this.canvas.toDataURL('image/png');
@@ -443,13 +459,14 @@ export class ComicBannerGenerator {
     ctx.globalCompositeOperation = 'screen';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
     const spacing = 20;
+    ctx.beginPath();
     for (let x = 0; x < w; x += spacing) {
       for (let y = 0; y < h; y += spacing) {
-        ctx.beginPath();
+        ctx.moveTo(x + 2.4, y);
         ctx.arc(x, y, 2.4, 0, Math.PI * 2);
-        ctx.fill();
       }
     }
+    ctx.fill();
     ctx.restore();
   }
 

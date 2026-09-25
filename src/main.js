@@ -400,7 +400,26 @@ function setupSubscribeForm() {
   });
 }
 
-// Tab Navigation (Planeta, Pôster, Inscrever-se)
+// Secret Curator Token for Private Access
+const SECRET_CURATOR_TOKEN = 'obs_k7x9m2_luckhaos';
+
+function checkCuratorAuth() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const secretParam = urlParams.get('secret') || urlParams.get('token');
+  const hash = window.location.hash;
+
+  if (
+    secretParam === SECRET_CURATOR_TOKEN ||
+    hash === `#secret=${SECRET_CURATOR_TOKEN}` ||
+    hash === `#${SECRET_CURATOR_TOKEN}`
+  ) {
+    sessionStorage.setItem('curator_token', SECRET_CURATOR_TOKEN);
+    return true;
+  }
+  return sessionStorage.getItem('curator_token') === SECRET_CURATOR_TOKEN;
+}
+
+// Tab Navigation (Planeta, Pôster, Inscrever-se, e Vault Secreto se autenticado)
 function setupTabNavigation() {
   const tabBtns = document.querySelectorAll('.nav-tab-btn');
   const viewSections = {
@@ -411,10 +430,16 @@ function setupTabNavigation() {
   };
 
   function switchTab(viewName, updateUrl = true) {
+    if (viewName === 'curadoria') {
+      if (!checkCuratorAuth()) {
+        viewName = 'planet';
+      }
+    }
+
     if (!viewSections[viewName]) viewName = 'planet';
 
     // Update active tab buttons
-    tabBtns.forEach(btn => {
+    document.querySelectorAll('.nav-tab-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.view === viewName);
     });
 
@@ -430,15 +455,21 @@ function setupTabNavigation() {
       setTimeout(() => heroRenderer.resizeCanvas(), 50);
     }
 
-    // Se mudou para a curadoria, carrega a grade e os pôsteres
+    // Se mudou para a curadoria confidencial, carrega a grade e os pôsteres
     if (viewName === 'curadoria') {
       loadCuradoriaDashboard();
     }
 
     // Keep URL hash in sync only if requested
     if (updateUrl) {
-      if (window.location.hash !== `#${viewName}`) {
-        history.replaceState(null, '', `#${viewName}`);
+      if (viewName === 'curadoria') {
+        if (!window.location.search.includes(SECRET_CURATOR_TOKEN) && !window.location.hash.includes(SECRET_CURATOR_TOKEN)) {
+          history.replaceState(null, '', `?secret=${SECRET_CURATOR_TOKEN}`);
+        }
+      } else {
+        if (window.location.hash !== `#${viewName}`) {
+          history.replaceState(null, '', `#${viewName}`);
+        }
       }
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -447,6 +478,22 @@ function setupTabNavigation() {
   tabBtns.forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.dataset.view, true));
   });
+
+  // Se o curador estiver autenticado com a chave secreta, monta o botão secreto 'Vault' no header
+  if (checkCuratorAuth()) {
+    const navTabs = document.querySelector('.header-nav-tabs');
+    if (navTabs && !document.getElementById('navTabCuradoria')) {
+      const secretTab = document.createElement('button');
+      secretTab.className = 'nav-tab-btn secret-curator-tab';
+      secretTab.id = 'navTabCuradoria';
+      secretTab.dataset.view = 'curadoria';
+      secretTab.title = 'Observatório do Autor (Acesso Confidencial)';
+      secretTab.innerHTML = `<span class="tab-icon">🛰️</span><span>Vault</span>`;
+      secretTab.style.borderColor = 'rgba(255, 60, 0, 0.4)';
+      navTabs.appendChild(secretTab);
+      secretTab.addEventListener('click', () => switchTab('curadoria', true));
+    }
+  }
 
   // In-page navigation links
   const btnGoToPoster = document.getElementById('btnGoToPoster');
@@ -464,24 +511,35 @@ function setupTabNavigation() {
     btnSubscribeBackToPlanet.addEventListener('click', () => switchTab('planet', true));
   }
 
-  // Initial tab from hash:
-  // Se o usuário acessou diretamente com hash (#poster, #subscribe, #planet, #curadoria)
-  const initialHash = window.location.hash.replace('#', '');
-  if (['poster', 'subscribe', 'curadoria'].includes(initialHash)) {
-    switchTab(initialHash, false);
-  } else if (initialHash === 'planet') {
-    switchTab('planet', false);
+  // Initial tab from path or hash:
+  const isCurator = checkCuratorAuth();
+  const urlParams = new URLSearchParams(window.location.search);
+  const secretRequested = urlParams.get('secret') === SECRET_CURATOR_TOKEN || urlParams.get('token') === SECRET_CURATOR_TOKEN || window.location.hash.includes(SECRET_CURATOR_TOKEN);
+  const initialHash = window.location.hash.replace('#', '').toLowerCase();
+
+  if (isCurator && secretRequested) {
+    switchTab('curadoria', false);
+  } else if (initialHash === 'poster') {
+    switchTab('poster', false);
+  } else if (initialHash === 'subscribe') {
+    switchTab('subscribe', false);
   } else {
-    // Acesso limpo ao domínio (https://exoplanetas.luckhaosbb.dev) -> MANTÉM limpo sem #planet!
+    // Acesso limpo ao domínio (https://exoplanetas.luckhaosbb.dev) -> MANTÉM limpo sem hashes estranhas!
     switchTab('planet', false);
-    if (window.location.hash) {
+    if (window.location.hash && !window.location.hash.includes(SECRET_CURATOR_TOKEN)) {
       history.replaceState(null, '', window.location.pathname + window.location.search);
     }
   }
 
   window.addEventListener('hashchange', () => {
     const hash = window.location.hash.replace('#', '');
-    if (['planet', 'poster', 'subscribe', 'curadoria'].includes(hash)) {
+    if (hash === 'curadoria' || hash.includes(SECRET_CURATOR_TOKEN)) {
+      if (checkCuratorAuth()) {
+        switchTab('curadoria', false);
+      } else {
+        switchTab('planet', false);
+      }
+    } else if (['planet', 'poster', 'subscribe'].includes(hash)) {
       switchTab(hash, false);
     } else {
       switchTab('planet', false);
@@ -490,7 +548,7 @@ function setupTabNavigation() {
 }
 
 // -------------------------------------------------------------
-// Painel do Autor / Curadoria Semanal
+// Painel Confidencial do Autor / Curadoria Semanal
 // -------------------------------------------------------------
 let curadoriaData = null;
 let selectedCuradoriaPlanet = null;
@@ -502,10 +560,12 @@ async function loadCuradoriaDashboard() {
 
   try {
     if (!curadoriaData) {
-      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 1.5rem;">Carregando grade semanal oficial...</div>`;
-      const res = await fetch('/api/curadoria');
+      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 1.5rem;">Carregando grade confidencial...</div>`;
+      const token = sessionStorage.getItem('curator_token') || SECRET_CURATOR_TOKEN;
+      const res = await fetch(`/api/curadoria?secret=${encodeURIComponent(token)}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      if (!data.success || !data.weekSchedule) throw new Error('Falha ao obter curadoria');
+      if (!data.success || !data.weekSchedule) throw new Error(data.error || 'Falha ao obter curadoria');
       curadoriaData = data.weekSchedule;
     }
 
@@ -517,7 +577,7 @@ async function loadCuradoriaDashboard() {
     }
   } catch (err) {
     console.error('Erro na curadoria:', err);
-    grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--accent-red); padding: 1.5rem;">Falha ao carregar grade do observatório.</div>`;
+    grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--accent-red); padding: 1.5rem;">Acesso confidencial restrito ou falha de conexão.</div>`;
   }
 }
 
@@ -574,9 +634,9 @@ async function selectCuradoriaPlanet(item) {
   if (downloadBtn) downloadBtn.disabled = true;
 
   try {
-    // Renderiza o pôster com o gerador oficial da aplicação
+    // Renderiza o pôster com prévia rápida instantânea
     const generator = new ComicBannerGenerator(p, p.bannerOrientation);
-    currentCuradoriaPosterUrl = await generator.generatePoster();
+    currentCuradoriaPosterUrl = await generator.generatePoster(true);
 
     if (spinner) spinner.style.display = 'none';
     if (img) {
@@ -585,21 +645,30 @@ async function selectCuradoriaPlanet(item) {
     }
     if (downloadBtn) {
       downloadBtn.disabled = false;
-      downloadBtn.onclick = () => {
+      downloadBtn.onclick = async () => {
         soundManager.playScanBeep();
-        const link = document.createElement('a');
-        const cleanName = p.name.replace(/\s+/g, '-').toUpperCase();
-        link.download = `COLECAO-${item.issueLabel}-${cleanName}-POSTER-A4.png`;
-        link.href = currentCuradoriaPosterUrl;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        downloadBtn.disabled = true;
+        const originalText = downloadBtn.innerHTML;
+        downloadBtn.innerHTML = `<span>Processando PNG 300 DPI...</span>`;
+        try {
+          const fullPng = await generator.generatePoster(false);
+          const link = document.createElement('a');
+          const cleanName = p.name.replace(/\s+/g, '-').toUpperCase();
+          link.download = `COLECAO-${item.issueLabel}-${cleanName}-POSTER-A4.png`;
+          link.href = fullPng;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } finally {
+          downloadBtn.disabled = false;
+          downloadBtn.innerHTML = originalText;
+        }
       };
     }
   } catch (err) {
     console.error('Erro ao renderizar banner na curadoria:', err);
     if (spinner) {
-      spinner.innerHTML = `<p style="color: var(--accent-red)">Erro ao processar arte do pôster.</p>`;
+      spinner.innerHTML = `<p style="color: var(--accent-red)">Erro ao processar arte do pôster: ${err.message || ''}</p>`;
     }
   }
 }

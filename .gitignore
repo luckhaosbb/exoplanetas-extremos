@@ -29,3 +29,9 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Confidential Planet Artworks & Future Drops (Author Preview Only)
+public/assets/planets/*
+!public/assets/planets/.gitkeep
+dist/assets/planets/*
+

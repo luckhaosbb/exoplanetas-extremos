@@ -104,6 +104,15 @@ export const planetController = {
    */
   async getCuradoria(req, res) {
     try {
+      // Validação de token de segurança confidencial do autor
+      const providedSecret = req.query.secret || req.headers['x-curadoria-secret'];
+      if (!providedSecret || providedSecret !== config.curadoriaSecret) {
+        return res.status(403).json({
+          success: false,
+          error: 'Acesso restrito ao observatório de curadoria. Chave secreta inválida ou não fornecida.'
+        });
+      }
+
       const { EXOPLANETS_CATALOG } = await import('../data/exoplanets.js');
       const fs = await import('fs');
       const path = await import('path');
@@ -112,13 +121,15 @@ export const planetController = {
       const __filename = fileURLToPath(import.meta.url);
       const __dirname = path.dirname(__filename);
       const planetsAssetDir = path.join(__dirname, '..', '..', 'public', 'assets', 'planets');
+      const distAssetDir = path.join(__dirname, '..', '..', 'dist', 'assets', 'planets');
 
       const daysOfWeek = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'];
       const weekPlanets = EXOPLANETS_CATALOG.slice(0, 7).map((planet, idx) => {
         const issueNum = idx + 1;
         const imgFileName = `${planet.id}.jpg`;
         const imgFullPath = path.join(planetsAssetDir, imgFileName);
-        const hasImage = fs.existsSync(imgFullPath);
+        const distFullPath = path.join(distAssetDir, imgFileName);
+        const hasImage = fs.existsSync(imgFullPath) || fs.existsSync(distFullPath);
 
         const d = new Date();
         d.setDate(d.getDate() + idx);
