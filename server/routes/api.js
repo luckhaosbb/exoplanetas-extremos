@@ -12,6 +12,15 @@ router.post('/curadoria/login', authController.login);
 router.get('/curadoria/verify', authController.verify);
 router.post('/curadoria/logout', authController.logout);
 
+// Rota de Health Check / Liveness (Perfeita para pings do UptimeRobot e cron-jobs sem onerar o servidor)
+router.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Rotas Públicas de Exoplanetas e Banners
 router.get('/today', planetController.getToday);
 router.get('/stats', planetController.getStats);

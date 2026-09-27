@@ -180,17 +180,16 @@ export const planetRepository = {
       { planetId: 'tres-2b', planetName: 'TrES-2b', dateStr: '2026-10-01', bannerOrientation: 'vertical' },
       { planetId: 'wasp-12b', planetName: 'WASP-12b', dateStr: '2026-10-02', bannerOrientation: 'horizontal' },
       { planetId: '55-cancri-e', planetName: '55 Cancri e (Janssen)', dateStr: '2026-10-03', bannerOrientation: 'vertical' },
-      { planetId: 'psr-b1257-12c', planetName: 'PSR B1257+12c (Poltergeist)', dateStr: '2026-10-04', bannerOrientation: 'vertical' },
-      { planetId: 'gj-1214b', planetName: 'GJ 1214b', dateStr: '2026-10-05', bannerOrientation: 'horizontal' }
+      { planetId: 'psr-b1257-12c', planetName: 'PSR B1257+12c (Poltergeist)', dateStr: '2026-10-04', bannerOrientation: 'vertical' }
     ];
 
     const currentCount = await this.count();
-    if (currentCount < 8) {
-      console.log('🪐 [DATABASE SEED] Inicializando grade homologada dos 8 primeiros exoplanetas...');
+    if (currentCount < 7) {
+      console.log('🪐 [DATABASE SEED] Inicializando grade homologada dos 7 primeiros exoplanetas (Semana 1)...');
       for (const p of defaultPlanets) {
         await this.save(p);
       }
-      console.log('✅ [DATABASE SEED] Grade oficial de 8 exoplanetas garantida no banco de dados.');
+      console.log('✅ [DATABASE SEED] Grade oficial de 7 exoplanetas da Semana 1 garantida no banco de dados.');
     }
   }
 };
