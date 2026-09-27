@@ -41,50 +41,157 @@ O planeta possuía estética de scanlines aprovada, porém a esfera carecia de p
 
 ---
 
-### 4. Protocolo Criptográfico de Autenticidade (NFT-Like nos Metadados Binários PNG)
+### 4. Protocolo de Tiragem Numerada & Certificação Criptográfica (Numbered Collector Mintage)
 
-#### 4.1. Conceito: Por que nos Metadados e Não na Arte?
-Imprimir códigos na arte visual desvaloriza a estética do pôster. Nos NFTs e certificados digitais autênticos, os dados de procedência ficam gravados na **estrutura binária do arquivo**.
+#### 4.1. Conceito: Tiragem Democrática com Posse Individualizada
+Ao invés de adotar artificialidades como escassez restritiva (onde apenas 1 pessoa baixa e o site trava) ou degradar imagens públicas com marcas d'água e baixa resolução, o sistema emprega o conceito de **Litografia Digital / Gravura Clássica de Colecionador**:
+1. **Arte Universal & Impecável:** Todo visitante acessa o pôster em resolução máxima (A4 300 DPI, sem marcas d'água, sem compressão destrutiva).
+2. **Exemplar Oficial Numerado:** Cada download aciona a emissão atômica do próximo exemplar da tiragem daquele drop (`#0001`, `#0002`, `#0042`...).
+3. **Titularidade Registrada:** O visitante pode informar seu nome/codinome no modal de emissão (ex: *"Lucas Gomes"* ou *"Comandante Silva"*), assinando sua posse no arquivo de forma permanente.
+4. **Assinatura HMAC-SHA256:** O servidor computa a assinatura com sua chave mestre secreta sobre a tupla `(Exoplaneta + Data + Número de Série + Nome do Titular + Entropia)`.
 
 #### 4.2. Especificação Técnica: Injeção de Chunks PNG `tEXt`
-O formato PNG (especificação W3C / ISO/IEC 15948) permite blocos de metadados textuais chamados **`tEXt`**. 
-O gerador intercepta o fluxo de bytes do PNG e, antes do encerramento com o chunk `IEND`, injeta os seguintes blocos binários oficiais com verificação de integridade CRC32:
+O gerador intercepta o fluxo de bytes do PNG e, antes do encerramento com o chunk `IEND`, injeta os blocos binários oficiais com verificação de integridade CRC32:
 
 | Chave de Metadado (`Keyword`) | Valor Injetado no Arquivo PNG |
 | :--- | :--- |
-| `Exoplanet_ID` | `hd-189733b` |
-| `Exoplanet_Name` | `HD 189733b` |
-| `Title` | `THE RAZOR RAIN HORROR` |
-| `Subtitle` | `A Chuva Lateral de Vidro Líquido` |
+| `Exoplanet_ID` | Identificador único do planeta (ex: `hd-189733b`) |
+| `Exoplanet_Name` | Nome astronômico oficial (ex: `HD 189733b`) |
+| `Title` | Título temático da capa estilo gibi (ex: `THE RAZOR RAIN HORROR`) |
+| `Subtitle` | Subtítulo atmosférico (ex: `Onde o Vidro Chove de Lado`) |
 | `Drop_Date` | Data oficial do drop (`YYYY-MM-DD`) |
-| `NFT_Token_ID` | `TOKEN#EXO-XXXX-XXXX-XXXXXX` (Hash único gerado na data) |
+| `Mint_Number` | Número do exemplar na tiragem (ex: `EDIÇÃO #0001`) |
+| `Collector_Name` | Nome ou codinome registrado do titular |
+| `NFT_Token_ID` | Token de identificação único (`TOKEN#EXO-YYYYMMDD-0001-XXXX`) |
+| `HMAC_Signature` | Assinatura HMAC-SHA256 gerada pelo servidor (`SHA256:...`) |
+| `Serial_Entropy` | Entropia aleatória de 8 caracteres para proteção contra colisões |
 | `Authenticity` | `Certified Original Daily Drop - Exoplanetas Extremos` |
+| `Verification_Endpoint` | `/api/verify-token` |
 | `Developer` | `Lucas Gomes (github.com/luckhaosbb)` |
-| `Timestamp` | Carimbo de data/hora ISO 8601 exato da emissão |
+| `Timestamp` | Carimbo ISO 8601 exato de emissão |
 
-#### 4.3. Como o Usuário Comprova a Autenticidade?
-Ao baixar a imagem:
-1. A arte visual é limpa e pura para uso como pôster de parede ou papel de parede.
-2. Ao inspecionar os detalhes do arquivo no Windows (Propriedades > Detalhes), no Photoshop, via terminal (`strings arquivo.png`) ou em um leitor de metadados, o token e o certificado oficial da NASA/Exoplanetas Extremos estão permanentemente embutidos na imagem.
+#### 4.3. Arte Visual Pura e Inviolável
+Ao contrário de modelos tradicionais que estampam marcas d'água visíveis ou carimbos de série sobre a arte, o motor preserva a ilustração 100% limpa, autoral e cinematográfica. Nenhuma coordenada, código hash ou texto de série é pintado no canvas. Toda a prova matemática de procedência e posse reside com exclusividade dentro dos blocos binários oficiais do PNG.
+
+#### 4.4. Auditoria de Posse & Verificação de Autenticidade
+Qualquer pessoa em posse do arquivo pode auditá-lo:
+- **Via Linha de Comando (CLI):** `npm run verify-poster <caminho-do-arquivo.png>`
+- **Via Endpoint HTTP:** `POST /api/verify-token` com os parâmetros do certificado.
+- Se alguém tentar alterar o nome do titular dentro dos metadados, a chave matemática SHA-256 é corrompida e o validador reprova o arquivo imediatamente com `❌ CERTIFICADO INVÁLIDO OU ADULTERADO`.
+
+#### 4.5. Proteção de Infraestrutura & Concorrência Atômica
+- O processamento de renderização 300 DPI consome 0% de CPU do servidor (roda inteiramente no cliente via Canvas 2D).
+- O banco de dados consome menos de 120 bytes por exemplar emitido.
+- A alocação de numeração é estritamente atômica e serializada (com lock por planeta e data), eliminando qualquer colisão mesmo se dezenas de usuários clicarem no exato mesmo milissegundo.
+- O backend limita emissões a no máximo 5 exemplares por IP por hora. Se o mesmo titular baixar novamente o mesmo planeta no mesmo dia, o sistema devolve o mesmo exemplar já emitido (`reissued: true`) sem inflacionar a numeração.
+- O banco de dados consome menos de 120 bytes por exemplar emitido.
+- Para prevenir esgotamento de seriais por scripts ou robôs, o backend limita as emissões a no máximo 5 exemplares por IP por hora. Se o mesmo titular baixar novamente o mesmo planeta no mesmo dia, o sistema devolve o mesmo exemplar já emitido (`reissued: true`) sem inflacionar a numeração.
 
 ---
 
-### 5. Comparativo e Análise: Opção 3 (Coleção Autoral) vs Opção 2 (IA no Backend)
+### 5. Arquitetura de Automação: Ciclo Semanal & Motor de IA Google Imagen 3
 
-#### 5.1. Como vai funcionar a Opção 3 (Coleção Ilustrada Autoral)?
-1. **Curadoria Visual Prévia:** Cada um dos exoplanetas catalogados recebe uma ilustração conceitual mestre em alta definição (300 DPI) com estilo de traço comic autêntico (linhas pesadas, paleta retro e sombreamento noir).
-2. **Camadas Dinâmicas:** O gerador do site carrega a ilustração de fundo do planeta correspondente e sobrepõe em tempo real:
-   - A moldura vintage de gibi;
-   - O selo *Approved by Cosmic Archive Authority*;
-   - O badge *Issue #01 - Extreme Worlds Daily*;
-   - O título exclusivo do dia com extrusão 3D e contorno de nanquim;
-   - A injeção automática da chave NFT nos metadados binários do PNG no momento do download.
-3. **Fluxo:** O download é instantâneo (menos de 150ms), roda no próprio navegador sem depender de servidores externos e a qualidade gráfica é 100% garantida e impecável.
+#### 5.1. O Ciclo Semanal Estruturado (Segunda a Domingo)
+1. **Semanas Fechadas:** O sistema organiza as publicações em blocos semanais de 7 dias (Segunda-feira a Domingo).
+2. **O Disparo de Sábado (00:00):** 
+   - Faltando apenas o drop de Domingo para encerrar a semana corrente, o agendador em background (`cronService`) trava a grade da **Próxima Semana completa (Segunda a Domingo)** no banco de dados.
+   - O domingo roda o último drop da semana atual; na segunda-feira 00:00, o novo bloco já está pronto para estreia sem risco de atrasos ou sobrecarga de requisições.
 
-#### 5.2. Análise de Qualidade de Imagem da Opção 2 (IA Generativa no Backend)
-- **O que a IA entrega de bom:** Muita riqueza de detalhes em atmosferas caóticas e texturas de ficção científica dos anos 70.
-- **Limitações Críticas de Qualidade na IA:**
-  - *Resolução Nativa Insuficiente:* As APIs de IA (Midjourney, DALL-E, Flux) geram nativamente em 1024x1024 ou no máximo 1792x1024 pixels. Para um pôster A4 de impressão gráfica em 300 DPI (3508x2480 pixels), a imagem gerada por IA precisaria ser redimensionada por upscaling artificial, o que muitas vezes deixa as linhas borradas ou com ruído.
-  - *Inconsistências no estilo Comic:* IAs frequentemente misturam estilos 3D hiper-realistas com pintura digital moderna, falhando em manter o rigoroso estilo de nanquim clássico vintage e cores chapadas da Marvel dos anos 70.
-  - *Instabilidade de Rede e Custo:* Cada geração consome créditos de API e leva de 15 a 40 segundos, podendo falhar se a API estiver fora do ar.
-- **Veredito:** A **Opção 3 é muito superior em fidelidade e qualidade de impressão**, pois garante que cada arte seja aprovada manualmente sem artefatos ou upscaling artificial, combinando a arte definitiva com a montagem programática e a criptografia NFT nos metadados.
+#### 5.2. Motor de IA em Cascata (Cascade Fallback Chain - Alta Disponibilidade)
+1. **Redundância em 4 Níveis (Zero Falhas):**
+   - **Rota 1 (Principal):** SiliconFlow (`black-forest-labs/FLUX.1-schnell`), gerando em ~2 segundos sem marcas d'água via GPU cluster.
+   - **Rota 2 (Alta Performance Gratuita):** Cloudflare Workers AI (`@cf/black-forest-labs/flux-1-schnell`), 10.000 Neurons gratuitos/dia na rede Edge global da Cloudflare.
+   - **Rota 3 (Secundária):** Hugging Face Serverless API (`black-forest-labs/FLUX.1-schnell` via `HF_TOKEN`).
+   - **Rota 4 (Rede de Segurança Infalível):** Pollinations.ai (Flux), 100% gratuito, sem cadastro, sem chave de API e sempre ativo.
+2. **Fila Sequencial & Prevenção de Falhas:**
+   - O agendador processa a fila sequencialmente. Caso qualquer rota externa responda com erro de saldo (`402`), rate limit (`429`) ou queda de serviço, o sistema comuta instantaneamente para a próxima rota sem interromper a execução do sábado.
+3. **Especificação Técnica Completa:** Consulte o documento [ARCHITECTURE_AI_PIPELINE.md](file:///C:/Users/Lucas/Downloads/Daily%20Exoplanets/ARCHITECTURE_AI_PIPELINE.md).
+
+#### 5.3. Banco de Dados Incremental (Sem dependência de 364 planetas no D0)
+- O banco de dados cresce de forma sustentável e orgânica em lotes de **7 exoplanetas por semana**.
+- Não há necessidade de cadastrar 364 exoplanetas previamente: a cada sábado, os próximos 7 planetas são agendados e salvos com suas respectivas fichas e chaves criptográficas.
+
+---
+
+### 6. Diretriz Oficial de Prompts & Engenharia Anti-Borda (Padrão 100% Full-Bleed)
+
+#### 6.1. Diagnóstico do Problema das Bordas
+Quando geradores de imagem (Midjourney, DALL-E, Imagen, Flux) recebem termos como `"comic book cover"`, o modelo deduz que deve renderizar a página física escaneada de uma revista dos anos 70. O resultado indesejado inclui:
+- Margens largas de papel amarelado/envelhecido ao redor do quadro;
+- Linhas pretas de moldura delimitando o desenho interno;
+- Encolhimento do desenho útil, impedindo o preenchimento total do pôster A4.
+
+#### 6.2. Solução Técnica Implementada
+1. Substituição do termo `"comic book cover"` por `"Full bleed, borderless cinematic science-fiction illustration in retro 1970s pulp graphic novel aesthetic"`.
+2. Especificação explícita de sangria total: `"The illustration completely fills 100% of the image from edge to edge, bleeding off all four sides with absolutely no borders, no margins, and no matting"`.
+3. Inclusão de cláusulas restritivas negativas estritas: `"Completely borderless, full bleed, seamless canvas edges, no borders, no margins, no outer frame, no framing box, no panel borders around the canvas, no paper border trim, no white borders"`.
+
+#### 6.3. Template Mestre Universal para Novos Exoplanetas
+- **Proporção Vertical (Padrão):** Aspect Ratio `2:3`
+- **Proporção Horizontal:** Aspect Ratio `3:2`
+
+```text
+Full bleed, borderless cinematic science-fiction illustration in retro 1970s pulp graphic novel aesthetic. The dark starry space, [ELEMENTOS_ATMOSFERICOS_DO_PLANETA], and cosmic visuals fill 100% of the image from edge to edge, bleeding off all four sides with absolutely no borders, no margins, and no matting. At the top center, stylized hand-drawn title lettering seamlessly integrated into the art reading "[TITULO_EM_INGLES]". The typography features [ESTILO_DA_TIPOGRAFIA: ex: blazing molten gold / brutal molten iron / jagged shattered silicate glass] letterforms with deep 3D block drop shadow and vibrant retro pulp gradient. Below the title, the exoplanet [NOME_DO_PLANETA] dominates the composition [DESCRICAO_DO_PLANETA_E_PERIGO_EXTREMO]. Dynamic Jack Kirby cosmic energy krackle dots, swirling atmospheric vortex bands, dramatic chiaroscuro lighting, bold ink linework, vibrant 1970s pulp science-fiction colors, visible four-color CMYK halftone dots. Completely borderless, full bleed, seamless canvas edges, no border, no white border, no paper border, no frame, no margin, no paper trim, no white edge, no picture frame, no page border, no comic page margins, no digital 3D CGI look, no logos, no barcode.
+```
+
+#### 6.4. Prompts Oficiais Homologados da Coleção
+
+* **Issue #001: HD 189733b – "THE RAZOR RAIN HORROR" (Horizontal 3:2):**
+```text
+Full bleed, borderless cinematic science-fiction illustration in retro 1970s pulp graphic novel aesthetic. The dark starry space, cobalt-blue storm clouds, planetary atmospheric vortex, and cosmic visuals fill 100% of the image from edge to edge, bleeding off all four sides with absolutely no borders, no margins, and no matting. At the top center, stylized hand-drawn title lettering seamlessly integrated into the art reading "THE RAZOR RAIN HORROR". The typography features jagged, razor-sharp shattered silicate glass letterforms with dynamic explosive perspective, heavy black India ink outlines, deep 3D block drop shadow, and a vibrant retro pulp gradient from bright cadmium yellow at the top to fiery vermilion red at the bottom. Below the title, the deep cobalt-blue exoplanet HD 189733b dominates the composition, caught in a cataclysmic tempest, with monstrous horizontal supersonic winds at Mach 7 whipping thousands of glowing, razor-sharp shards of molten liquid glass horizontally across the planetary surface and bleeding off the edges of the canvas. Dynamic Jack Kirby cosmic energy krackle dots, swirling atmospheric bands, dramatic chiaroscuro lighting, bold ink linework, vibrant 1970s pulp science-fiction colors, visible four-color CMYK halftone dots. Completely borderless, full bleed, seamless canvas edges, no border, no white border, no paper border, no frame, no margin, no paper trim, no white edge, no picture frame, no page border, no comic page margins, no digital 3D CGI look, no logos, no barcode.
+```
+
+* **Issue #002: KELT-9b – "THE STELLAR FURNACE" (Vertical 2:3):**
+```text
+Full bleed, borderless cinematic science-fiction illustration in retro 1970s pulp graphic novel aesthetic. The dark starry space, nebulae, and cosmic visuals fill 100% of the image from edge to edge, bleeding off all four sides with absolutely no borders, no margins, and no matting. At the top center, stylized hand-drawn title lettering seamlessly integrated into the art reading "THE STELLAR FURNACE". The typography features blazing molten gold and blinding solar fire letterforms with deep 3D block drop shadow and retro pulp gradient from bright solar yellow to incandescent orange-red. Below the title, the ultra-hot exoplanet KELT-9b dominates the composition, glowing violently with blazing solar furnace heat at 4300 degrees Celsius, orbiting dangerously close to a blinding blue-white star, with a monstrous comet tail of vaporized iron and titanium plasma streaming into deep space. Dynamic Jack Kirby cosmic energy krackle dots, swirling planetary atmospheric bands, dramatic chiaroscuro lighting, bold ink linework, vibrant 1970s pulp science-fiction colors, visible four-color CMYK halftone dots. Completely borderless, full bleed, seamless canvas edges, no border, no white border, no paper border, no frame, no margin, no paper trim, no white edge, no picture frame, no page border, no comic page margins, no digital 3D CGI look, no logos, no barcode.
+```
+
+* **Issue #003: WASP-76b – "THE IRON DELUGE" (Vertical 2:3):**
+```text
+Full bleed, borderless cinematic science-fiction illustration in retro 1970s pulp graphic novel aesthetic. The dark starry space, stormy metallic atmospheric clouds, and cosmic visuals fill 100% of the image from edge to edge, bleeding off all four sides with absolutely no borders, no margins, and no matting. At the top center, stylized hand-drawn title lettering seamlessly integrated into the art reading "THE IRON DELUGE". The typography features heavy, brutal molten iron letterforms with jagged glowing dripping edges, heavy black India ink outlines, deep 3D block drop shadow, and a vibrant retro pulp gradient from bright molten yellow to fiery iron-red. Below the title, the tidally locked exoplanet WASP-76b dominates the composition with a dramatic terminator line: the blistering copper dayside contrasts against the dark nightside where an apocalyptic, torrential deluge of incandescent liquid molten iron raindrops falls through dark metallic storm clouds and surreal alien landscape below. Dynamic Jack Kirby cosmic energy krackle dots, swirling atmospheric vortex bands, dramatic chiaroscuro lighting, bold ink linework, vibrant 1970s pulp science-fiction colors, visible four-color CMYK halftone dots. Completely borderless, full bleed, seamless canvas edges, no border, no white border, no paper border, no frame, no margin, no paper trim, no white edge, no picture frame, no page border, no comic page margins, no digital 3D CGI look, no logos, no barcode.
+```
+
+* **Issue #004: TrES-2b – "THE LIGHTLESS VOID" (Vertical 2:3):**
+```text
+Full bleed, borderless cinematic science-fiction illustration in retro 1970s pulp graphic novel aesthetic. The dark starry space, eerie deep space nebula, shadowy cosmic dust, and cosmic visuals fill 100% of the image from edge to edge, bleeding off all four sides with absolutely no borders, no margins, and no matting. At the top center, stylized hand-drawn title lettering seamlessly integrated into the art reading "THE LIGHTLESS VOID". The typography features abyssal obsidian and smoking charcoal letterforms with faint crimson glowing ember cracks and edges, heavy black India ink outlines, deep 3D block drop shadow, and a sinister retro pulp gradient from dark fiery blood-red to pitch void black. Below the title, the pitch-black exoplanet TrES-2b dominates the composition, darker than coal and absorbing 99% of all light, a monstrous light-devouring sphere looming menacingly against the stars, faintly glowing with eerie deep infrared thermal red embers radiating from its mysterious ultra-hot atmosphere of vaporized sodium and titanium oxide. Dynamic Jack Kirby cosmic energy krackle dots, swirling atmospheric vortex bands, dramatic chiaroscuro lighting, bold ink linework, vibrant 1970s pulp science-fiction colors, visible four-color CMYK halftone dots. Completely borderless, full bleed, seamless canvas edges, no border, no white border, no paper border, no frame, no margin, no paper trim, no white edge, no picture frame, no page border, no comic page margins, no digital 3D CGI look, no logos, no barcode.
+```
+
+* **Issue #005: WASP-12b – "THE DEVOURING OVAL" (Horizontal 3:2):**
+```text
+Full bleed, borderless cinematic science-fiction illustration in retro 1970s pulp graphic novel aesthetic. The dark starry space, blazing solar corona filaments, superheated carbon gas ribbons, and cosmic visuals fill 100% of the image from edge to edge, bleeding off all four sides with absolutely no borders, no margins, and no matting. At the top center, stylized hand-drawn title lettering seamlessly integrated into the art reading "THE DEVOURING OVAL". The typography features tidal-stretched blazing solar plasma and molten amber letterforms with explosive solar flare accents, heavy black India ink outlines, deep 3D block drop shadow, and a vibrant retro pulp gradient from intense incandescent yellow at the top to fiery magma orange at the bottom. Below the title, the doomed exoplanet WASP-12b dominates the composition, violently distorted and stretched into an egg-like oval by titanic tidal gravitational forces, as a colossal nearby yellow dwarf star voraciously siphons and devours its glowing superheated atmosphere in massive swirling bridges of incandescent gas and plasma streaming across the cosmos and bleeding off the edges of the canvas. Dynamic Jack Kirby cosmic energy krackle dots, swirling atmospheric vortex bands, dramatic chiaroscuro lighting, bold ink linework, vibrant 1970s pulp science-fiction colors, visible four-color CMYK halftone dots. Completely borderless, full bleed, seamless canvas edges, no border, no white border, no paper border, no frame, no margin, no paper trim, no white edge, no picture frame, no page border, no comic page margins, no digital 3D CGI look, no logos, no barcode.
+```
+
+* **Issue #006: 55 Cancri e – "THE DIAMOND CRUCIBLE" (Vertical 2:3):**
+```text
+Full bleed, borderless cinematic science-fiction illustration in retro 1970s pulp graphic novel aesthetic. The dark starry space, shimmering crystalline dust, toxic cyan vapor plumes, and cosmic visuals fill 100% of the image from edge to edge, bleeding off all four sides with absolutely no borders, no margins, and no matting. At the top center, stylized hand-drawn title lettering seamlessly integrated into the art reading "THE DIAMOND CRUCIBLE". The typography features scintillating crystalline diamond and burning molten lava letterforms with razor-sharp gem-cut facets and dripping liquid magma edges, heavy black India ink outlines, deep 3D block drop shadow, and a vibrant retro pulp gradient from electric crystalline cyan-blue to fiery molten lava-red. Below the title, the super-Earth exoplanet 55 Cancri e dominates the composition, a hellish world of global boiling liquid magma oceans and fiery volcanic geysers spewing toxic cyan cyanide clouds, with titanic crust fissures revealing glowing compressed sparkling pure diamond crystals under extreme planetary pressure, bathed in the fierce glare of its nearby star. Dynamic Jack Kirby cosmic energy krackle dots, swirling atmospheric vortex bands, dramatic chiaroscuro lighting, bold ink linework, vibrant 1970s pulp science-fiction colors, visible four-color CMYK halftone dots. Completely borderless, full bleed, seamless canvas edges, no border, no white border, no paper border, no frame, no margin, no paper trim, no white edge, no picture frame, no page border, no comic page margins, no digital 3D CGI look, no logos, no barcode.
+```
+
+* **Issue #007: PSR B1257+12c – "THE PULSAR OF THE DEAD" (Vertical 2:3):**
+```text
+Full bleed, borderless cinematic science-fiction illustration in retro 1970s pulp graphic novel aesthetic. The dark starry space, ghostly glowing magnetic nebula filaments, lethal gamma radiation arcs, and cosmic visuals fill 100% of the image from edge to edge, bleeding off all four sides with absolutely no borders, no margins, and no matting. At the top center, stylized hand-drawn title lettering seamlessly integrated into the art reading "THE PULSAR OF THE DEAD". The typography features crackling radioactive neon-violet and electric cyan lightning letterforms with jagged ethereal ghost-like edges, heavy black India ink outlines, deep 3D block drop shadow, and a vibrant retro pulp gradient from brilliant electric cyan at the top to deep radioactive violet-purple at the bottom. Below the title, the eerie rocky exoplanet PSR B1257+12c dominates the composition, a ghost world condemned to orbit a rapidly spinning dead neutron star pulsar, swept by lethal relativistic lighthouse beams of gamma-ray radiation, intense magnetic shockwaves, and spectral neon auroras washing over its cratered desolate surface. Dynamic Jack Kirby cosmic energy krackle dots, swirling atmospheric vortex bands, dramatic chiaroscuro lighting, bold ink linework, vibrant 1970s pulp science-fiction colors, visible four-color CMYK halftone dots. Completely borderless, full bleed, seamless canvas edges, no border, no white border, no paper border, no frame, no margin, no paper trim, no white edge, no picture frame, no page border, no comic page margins, no digital 3D CGI look, no logos, no barcode.
+```
+
+* **Issue #008: GJ 1214b – "THE BOUNDLESS BOILING SEA" (Horizontal 3:2):**
+```text
+Full bleed, borderless cinematic science-fiction illustration in retro 1970s pulp graphic novel aesthetic. The dark starry space, dense sapphire steam clouds, glowing atmospheric vapor veils, and cosmic visuals fill 100% of the image from edge to edge, bleeding off all four sides with absolutely no borders, no margins, and no matting. At the top center, stylized hand-drawn title lettering seamlessly integrated into the art reading "THE BOUNDLESS BOILING SEA". The typography features surging ocean water and high-pressure boiling steam letterforms with churning wave crests and swirling vapor tendrils, heavy black India ink outlines, deep 3D block drop shadow, and a vibrant retro pulp gradient from luminous aquamarine-cyan at the top to deep oceanic abyssal blue at the bottom. Below the title, the mysterious water-world exoplanet GJ 1214b dominates the composition, a shoreless and bottomless oceanic super-Earth blanketed in thick sweltering steam mists and massive cyclonic clouds, where boiling supercritical water at 20000 atmospheres of crushing pressure churns under the eerie reddish glow of a dim red dwarf star and bleeds off all canvas edges. Dynamic Jack Kirby cosmic energy krackle dots, swirling atmospheric vortex bands, dramatic chiaroscuro lighting, bold ink linework, vibrant 1970s pulp science-fiction colors, visible four-color CMYK halftone dots. Completely borderless, full bleed, seamless canvas edges, no border, no white border, no paper border, no frame, no margin, no paper trim, no white edge, no picture frame, no page border, no comic page margins, no digital 3D CGI look, no logos, no barcode.
+```
+
+---
+
+### 7. Painel de Curadoria Semanal do Autor
+
+#### 7.1. Finalidade
+Permite ao autor/curador inspecionar e auditar antecipadamente os 7 exoplanetas da próxima semana agendados no sábado, visualizar as artes integradas ao motor do pôster A4 em tempo real, baixar os arquivos finais e regenerar individualmente qualquer imagem com um clique através do Google Cloud Imagen 3.
+
+#### 7.2. Funcionalidades da Curadoria
+1. **Auditoria Visual:** Grade de 7 dias (Segunda a Domingo) com status de arte (`● Arte Pronta` ou `○ Aguardando`).
+2. **Regeneração On-Demand (`POST /api/curadoria/regenerate`):** Permite disparar uma nova geração para um planeta específico caso a arte gerada na madrugada de sábado necessite de refinamento.
+3. **Disparo Manual de Ciclo (`POST /api/curadoria/run-weekly-cycle`):** Permite adiantar ou reexecutar o agendamento da próxima semana a qualquer momento pelo botão *"⚡ Executar Ciclo da Próxima Semana"*.
+
+#### 7.3. Arquitetura de Segurança da Curadoria (Cybersecurity Hardening)
+- **Token Secreto HMAC-SHA256:** Acesso restrito via token criptográfico assinado com `SERVER_SECRET_KEY` emitido exclusivamente pelo script confidencial `scripts/curadoria.js`.
+- **Proteção contra Path Traversal (CWE-22):** Validação estrita via Regex (`/^[a-zA-Z0-9_-]{2,64}$/`) para qualquer parâmetro `planetId` antes de leitura ou gravação de imagens em disco.
+- **Proteção contra Information Disclosure (CWE-200):** Credenciais como `GOOGLE_GENAI_API_KEY` e `SERVER_SECRET_KEY` nunca são enviadas ao cliente ou expostas em payloads de erro.
+- **Isolamento de Assets:** Acesso público bloqueado a planetas não publicados enquanto o site estiver em pré-estreia (`COMING_SOON=true`).
+- **Comando de Abertura:** `npm run curadoria` (detecta servidor ativo ou sobe automaticamente e abre o navegador autenticado).
+

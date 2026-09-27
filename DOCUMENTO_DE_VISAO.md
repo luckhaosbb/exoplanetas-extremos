@@ -21,21 +21,29 @@ Ao final da jornada, o usuário tem acesso exclusivo a um **Pôster/Banner colec
 
 ---
 
-## 3. Regras de Negócio e Lógica de Rotação
+## 3. Regras de Negócio, Automação & Ciclos Semanais
 
-### 3.1. O Drop Diário (Daily Extreme Exoplanet)
-- O sistema opera em ciclos de 24 horas sincronizados com a meia-noite (00:00).
-- Um relógio de contagem regressiva em tempo real ("Próximo Salto Orbital em: HH:MM:SS") alerta sobre o tempo restante para explorar aquele planeta e baixar o banner.
+### 3.1. O Ciclo Semanal Estruturado (Segunda a Domingo)
+- O sistema opera em **Semanas Cósmicas Fechadas (Segunda-feira 00:00 a Domingo 23:59)**.
+- **O Disparo de Sábado (00:00):** Todo sábado à meia-noite, o agendador em background (`cronService`) entra em ação. Faltando apenas o drop de domingo para encerrar a semana corrente, o sistema bloqueia e agenda a **Próxima Semana completa (Segunda a Domingo)** no banco de dados.
+- O domingo roda o último drop da semana atual sem perturbações, e na segunda-feira à 00:00 o primeiro planeta da nova semana estreia instantaneamente sem dependência de processamentos pesados.
 
-### 3.2. Regra de Não Repetição & Banco de Dados
-- **Ineditismo Garantido:** Antes de selecionar o planeta do dia, o sistema consulta o banco de dados para recuperar o histórico de planetas já publicados.
-- O planeta selecionado **nunca se repetirá** até que o catálogo de mundos extremos seja esgotado.
-- Todas as informações do planeta publicado, métricas geradas, chaves criptográficas e o banner definitivo são persistidos no banco de dados (PostgreSQL com fallback resiliente).
+### 3.2. Motor de IA em Cascata (Cascade Fallback Chain - Alta Disponibilidade)
+- O backend Node.js implementa uma **Cascata de Redundância Multi-Provedores** para garantir 100% de disponibilidade nos agendamentos de sábado:
+  - **Rota 1 (Principal):** SiliconFlow (`black-forest-labs/FLUX.1-schnell`), para geração ultrarrápida em 2 segundos sem marcas d'água.
+  - **Rota 2 (Secundária):** Hugging Face Serverless Inference API (`black-forest-labs/FLUX.1-schnell` via token `HF_TOKEN`).
+  - **Rota 3 (Rede de Segurança Infalível):** Pollinations.ai (Flux), 100% gratuito e sem dependência de chaves de API.
+- **Estratégia Anti-Erro 429 & Retries:** Processamento sequencial com delay de segurança entre exoplanetas e retry automático com backoff exponencial. Detalhes completos no documento [ARCHITECTURE_AI_PIPELINE.md](file:///C:/Users/Lucas/Downloads/Daily%20Exoplanets/ARCHITECTURE_AI_PIPELINE.md).
+- As imagens são gravadas localmente nas pastas `server/assets/planets/` e `public/assets/planets/` no padrão **100% Full-Bleed**.
 
-### 3.3. Exclusividade e Efemeridade para o Usuário
-- O usuário tem acesso **somente ao planeta e banner do dia atual**.
-- Não há arquivo público ou navegação livre por planetas passados na interface padrão, gerando expectativa e valor para cada drop diário.
-- Os dados históricos ficam guardados no banco de dados com acesso restrito/administrativo.
+### 3.3. Banco de Dados Incremental (Sem dependência de 364 planetas no D0)
+- O banco de dados cresce de forma sustentável e orgânica em lotes de **7 exoplanetas por semana**.
+- A cada sábado, o sistema agenda os próximos 7 mundos a partir da fila do catálogo/NASA TAP API, atribuindo as fichas técnicas, títulos temáticos e chaves criptográficas sem exigir que o banco possua um ano inteiro pré-cadastrado no dia do lançamento.
+
+### 3.4. Exclusividade e Efemeridade para o Visitante
+- O visitante público tem acesso **somente ao exoplaneta e banner do dia atual**.
+- Um relógio de contagem regressiva em tempo real ("Próximo Salto Orbital em: HH:MM:SS") alerta sobre o tempo restante para explorar aquele mundo e baixar o pôster antes da virada da meia-noite.
+- Não há arquivo público de downloads passados, mantendo o apelo de escassez e drop diário.
 
 ---
 
@@ -69,27 +77,35 @@ Ao final da jornada, o usuário tem acesso exclusivo a um **Pôster/Banner colec
 ## 5. Gerador de Banner/Pôster Comic A4 (Redefinição Visual Autoral)
 
 ### 5.1. Conceito do Pôster
-Arte limpa, autoral e com forte identidade de capa de quadrinhos clássicos (estilo Marvel pulp anos 60/70), sem caixas pesadas que poluam a ilustração.
+Arte limpa, autoral e com forte identidade de graphic novel cósmica vintage (estilo anos 70 / Jack Kirby), em padrão **100% Full-Bleed (sem bordas de papel, sem moldura externa de gibi)**, permitindo que a arte sangrada ocupe todo o pôster A4 e os selos oficiais flutuem diretamente sobre o cosmos.
 
 ### 5.2. Elementos Gráficos do Banner
-1. **Composição Limpa e Artística (Zero Poluição Visual):**
-   - **Sem barras artificiais:** A arte e o espaço cósmico ocupam todo o pôster sem caixas pesadas.
+1. **Composição 100% Full-Bleed (Zero Bordas e Zero Poluição Visual):**
+   - **Sem margens de papel ou molduras de gibi:** A arte estende-se até o último pixel em todas as 4 direções, preenchendo completamente o canvas A4 tanto em orientações horizontais quanto verticais.
    - **Sem caixas de especificações e sem textos adicionais:** Toda informação secundária fica na página web, liberando o pôster para impacto visual cinematográfico puro.
 2. **Selo de Autoridade Cósmica:**
    - Mantido o selo vintage no canto superior direito: *"APPROVED BY THE COSMIC ARCHIVE AUTHORITY ★ NASA ★"*.
 3. **Box de Identificação Retrô:**
-   - Mantido no canto superior esquerdo o selo *"ISSUE #01 - EXTREME WORLDS DAILY"* (sem preço).
-4. **Título Único e Temático do Planeta:**
-   - Cada exoplaneta recebe um título temático de gibi em destaque no topo (ex: *"THE RAZOR RAIN HORROR"*, *"THE IRON DELUGE"*), com tipografia de quadrinhos com extrusão 3D e contorno de nanquim.
-5. **Chave Criptográfica Invisível em Metadados Binários (NFT-like Provenance):**
-   - Em vez de poluir a arte visual com textos, a **Chave Criptográfica Única (Token NFT)**, a data oficial do drop e o certificado são gravados **diretamente nos blocos binários de metadados do arquivo PNG (chunks oficiais `tEXt`)**. O usuário baixa um pôster 100% limpo, mas que carrega o certificado embutido em seu código para sempre.
-6. **Download em Alta Resolução (A4):**
-   - Proporção exata A4 (Vertical ou Horizontal conforme o planeta, ex: 2480 × 3508 pixels em 300 DPI).
-   - Formato PNG com metadados binários prontos para impressão ou validação digital.
+   - Mantido no canto superior esquerdo o selo *"ISSUE #001"* estilizado em amarelo e vermelho.
+4. **Plaqueta com Nome Oficial do Exoplaneta:**
+   - No canto inferior esquerdo, plaqueta vintage amarela clássica com o nome do mundo (ex: *"WASP-76b"*, *"HD 189733b"*).
+5. **Título Único e Temático do Planeta:**
+   - Cada exoplaneta recebe um título temático integrado organicamente na arte gerada (ex: *"THE RAZOR RAIN HORROR"*, *"THE IRON DELUGE"*, *"THE STELLAR FURNACE"*), com tipografia de quadrinhos com extrusão 3D e contorno de nanquim.
+6. **Protocolo de Tiragem Numerada de Colecionador (Numbered Collector Mintage):**
+   - **Democratização & Posse Individualizada:** Todos os visitantes podem baixar o pôster oficial em resolução máxima (A4 300 DPI, sem marcas d'água e sem paywall). Cada download emite atômica e sequencialmente o próximo número de tiragem (`#0001`, `#0002`, `#0042`...).
+   - **Registro de Titularidade Criptográfica:** O colecionador pode informar seu nome ou codinome no modal de emissão, que é assinado matematicamente pelo backend com **HMAC-SHA256**.
+   - **Metadados Binários Injetados:** O token, a assinatura digital, o número do exemplar e a data do drop são gravados na estrutura binária do PNG (chunks `tEXt`), preservando a arte visual 100% limpa, pura e cinematográfica.
+   - **Auditoria de Autenticidade:** Verificação pública no terminal através do comando `npm run verify-poster <arquivo.png>`, com detecção matemática imediata de qualquer adulteração.
+7. **Download em Alta Resolução (A4 300 DPI):**
+   - Proporção exata A4: Vertical (`2480 × 3508px`) ou Horizontal (`3508 × 2480px`).
 
 ---
 
-## 6. Integrações & Assinatura de Autoria
+## 6. Integrações, Curadoria & Assinatura de Autoria
+- **Painel de Curadoria Semanal do Autor (`npm run curadoria`):**
+  - Módulo confidencial para o autor inspecionar e auditar antecipadamente os 7 exoplanetas da próxima semana.
+  - Exibe o status das artes (`● Arte Pronta` ou `○ Aguardando`), o preview do pôster A4 Full-Bleed e botão **"🔄 Regenerar Arte (Google Imagen 3)"** para regerar qualquer ilustração individualmente com um clique.
+  - Botão **"⚡ Executar Ciclo da Próxima Semana"** para disparar o agendamento e a fila de geração sob demanda a qualquer momento.
 - **Seção de Autoria no Rodapé:**
   - Link direto para o perfil do desenvolvedor no **GitHub** (`https://github.com/luckhaosbb`).
   - Link direto para o perfil profissional no **LinkedIn** (`https://www.linkedin.com/in/lucas-gomes-ab49582bb`).
@@ -98,27 +114,52 @@ Arte limpa, autoral e com forte identidade de capa de quadrinhos clássicos (est
 
 ---
 
-## 7. Arquitetura do Sistema e Estrutura de Pastas
+## 7. Arquitetura do Sistema e Estrutura de Pastas (SOLID & Clean Architecture)
 
 ```
 Daily Exoplanets/
+├── ARCHITECTURE_AI_PIPELINE.md      # Arquitetura do pipeline de IA e Cascade Fallback Chain
 ├── DOCUMENTO_DE_VISAO.md            # Documento de visão do produto
 ├── FSD.md                           # Especificação funcional detalhada (FSD)
-├── server/                          # Backend Node.js / Express
-│   ├── db.js                        # Conexão PostgreSQL com fallback local
-│   ├── server.js                    # Endpoints /api/today, /api/save-banner, /api/stats
-│   └── data/                        # Acervo e banco local persistente
+├── README.md                        # Documentação técnica e guia de execução
+├── scripts/
+│   └── curadoria.js                 # Launcher de inspeção semanal com token HMAC seguro
+├── server/                          # Backend Node.js / Express (Arquitetura em Camadas)
+│   ├── assets/planets/              # Acervo confidencial de artes oficiais Full-Bleed
+│   ├── config/index.js              # Configurações tipadas de ambiente (PORT, Chaves, IA)
+│   ├── controllers/                 # Camada de apresentação (HTTP Controllers)
+│   │   ├── authController.js
+│   │   ├── cryptoController.js
+│   │   ├── planetController.js      # Rotas de exoplanetas, curadoria e regeneração
+│   │   └── subscriberController.js
+│   ├── data/
+│   │   ├── exoplanets.js            # Catálogo e metadados astronômicos
+│   │   └── prompts.js               # Acervo e construtor de prompts homologados Full-Bleed
+│   ├── services/                    # Camada de regras de negócio
+│   │   ├── aiImageService.js        # Fila e integração com Google Cloud Imagen 3
+│   │   ├── authService.js           # Gestão de tokens de sessão HMAC-SHA256
+│   │   ├── cronService.js           # Agendador cron do ciclo de sábado à meia-noite
+│   │   ├── cryptoService.js         # Emissão de certificados NFT-like
+│   │   ├── planetService.js         # Orquestração do ciclo de vida e agendamento semanal
+│   │   └── subscriberService.js
+│   ├── repositories/                # Camada de acesso a dados (Híbrido Postgres/JSON)
+│   │   ├── database.js
+│   │   ├── planetRepository.js
+│   │   └── subscriberRepository.js
+│   ├── middlewares/authMiddleware.js# Guardião de autenticação de curadoria
+│   ├── routes/api.js                # Roteador desacoplado Express
+│   └── server.js                    # Bootstrap do servidor, cron e headers de segurança
 ├── src/
 │   ├── components/
-│   │   ├── planetRenderer.js        # Motor 3D responsivo com giro tangível e inércia
-│   │   ├── comicBannerGenerator.js  # Gerador procedural A4 sem caixas, com chave NFT e títulos únicos
-│   │   ├── nasaApi.js               # Conexão com NASA TAP API
+│   │   ├── comicBannerGenerator.js  # Motor procedural A4 Full-Bleed com injeção de chunks tEXt
+│   │   ├── curadoriaModule.js       # Interface do observatório de curadoria e regeneração IA
+│   │   ├── planetRenderer.js        # Motor 3D responsivo com relevo orbital e inércia física
+│   │   ├── nasaApi.js               # Conexão assíncrona com NASA TAP API
 │   │   └── soundEffects.js          # Sistema de áudio sintetizado Web Audio API
-│   ├── data/
-│   │   └── exoplanets.js            # Acervo com títulos temáticos comic e orientações A4
-│   ├── style.css                    # Estilização sci-fi terminal CRT e preview A4
-│   └── main.js                      # Orquestrador da aplicação, contagem e eventos
-├── index.html                       # Página única limpa e imersiva
-├── package.json                     # Scripts dev e dependências
-└── vite.config.js                   # Configuração e proxy
+│   ├── data/exoplanets.js           # Fallback estático de emergência offline
+│   ├── style.css                    # Estilização sci-fi terminal CRT e galeria A4
+│   └── main.js                      # Orquestrador SPA, roteamento e eventos
+├── index.html                       # Aplicação web imersiva
+├── package.json                     # Scripts e dependências (node-cron, etc.)
+└── vite.config.js                   # Configuração Vite e proxy de desenvolvimento
 ```

@@ -5,6 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Exoplanetas Extremos - Os Mundos Mais Mortais do Universo</title>
   <meta name="description" content="Descubra a cada dia um exoplaneta extremo inédito. Explore o simulador 3D em monitor retrô e baixe o pôster colecionável estilo Comic Marvel A4 antes da meia-noite." />
+  <meta name="keywords" content="exoplanetas, astronomia, nasa, exoplanetas extremos, cosmos, posters astronomicos, quadrinhos sci-fi, planetas mortais" />
+  <meta name="author" content="Lucas Gomes • Observatório de Exoplanetas Extremos" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://exoplanets.luckhaosbb.dev/" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://exoplanets.luckhaosbb.dev/" />
+  <meta property="og:title" content="Exoplanetas Extremos - Os Mundos Mais Mortais do Universo" />
+  <meta property="og:description" content="Descubra a cada dia um exoplaneta extremo inédito. Explore a telemetria 3D e baixe o pôster colecionável estilo Comic A4." />
+  <meta property="og:image" content="https://exoplanets.luckhaosbb.dev/hero_bg.jpg" />
+  <meta property="og:locale" content="pt_BR" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://exoplanets.luckhaosbb.dev/" />
+  <meta name="twitter:title" content="Exoplanetas Extremos - Os Mundos Mais Mortais do Universo" />
+  <meta name="twitter:description" content="Descubra a cada dia um exoplaneta extremo inédito com simulação 3D e pôster colecionável A4." />
+  <meta name="twitter:image" content="https://exoplanets.luckhaosbb.dev/hero_bg.jpg" />
+
+  <!-- Schema.org JSON-LD para o Google Search -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Exoplanetas Extremos",
+    "url": "https://exoplanets.luckhaosbb.dev/",
+    "description": "Catálogo astronômico diário de exoplanetas hostis com simulador orbital 3D e arte gráfica em estilo pulp sci-fi colecionável.",
+    "applicationCategory": "EducationalApplication",
+    "genre": "Astronomia e Ficção Científica",
+    "inLanguage": "pt-BR",
+    "author": {
+      "@type": "Person",
+      "name": "Lucas Gomes"
+    }
+  }
+  </script>
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,6 +84,18 @@
 
     <!-- Main Container -->
     <main class="main-content">
+      <!-- Barra de Auditoria / Navegação de Edições no Modo Prévia -->
+      <div class="preview-edition-selector-bar" id="previewEditionBar" style="display: none;">
+        <div class="preview-bar-inner">
+          <div class="preview-bar-title">
+            <span class="preview-pulse-dot"></span>
+            <strong>AUDITORIA DA COLEÇÃO (MODO PRÉVIA):</strong>
+            <span>Clique para alternar o planeta, 3D, dossiê e pôster A4:</span>
+          </div>
+          <div class="preview-chips-container" id="previewChipsContainer"></div>
+        </div>
+      </div>
+
       <!-- Shared Edition Header Bar: Registro do Dia (Esquerda) e Próximo Mundo + Som (Direita) -->
       <div class="edition-header-bar">
         <div class="edition-bar-left">
@@ -138,7 +187,13 @@
                   <span class="sensor-name">SENSOR 3D</span>
                   <kbd class="ctrl-kbd">CTRL</kbd>
                 </button>
-                <span class="drag-hint">↻ Arraste para rotacionar</span>
+                <div class="viewport-header-actions">
+                  <button class="btn-snapshot-sensor" id="btnSnapshotSensor" title="Capturar Foto Oficial do Sensor 3D">
+                    <span>📸</span>
+                    <span>Salvar Foto 3D</span>
+                  </button>
+                  <span class="drag-hint">↻ Arraste para rotacionar</span>
+                </div>
               </div>
               
               <div class="canvas-wrapper">
@@ -304,11 +359,20 @@
 
             <!-- Download Action Controls -->
             <div class="comic-download-actions">
+              <div class="mint-stats-banner" id="mintStatsBanner">
+                <span class="mint-stats-icon">🪙</span>
+                <div class="mint-stats-info">
+                  <span class="mint-stats-title">TIRAGEM DE COLECIONADOR ABERTA</span>
+                  <span class="mint-stats-counter" id="mintNextLabel">Próximo Exemplar Oficial: <strong>#0001</strong></span>
+                </div>
+              </div>
+
               <button class="btn btn-comic-download" id="downloadPosterBtn" disabled>
-                Baixar Pôster Oficial (PNG)
+                <span>Baixar Exemplar Oficial (PNG)</span>
+                <span class="btn-arrow">↓</span>
               </button>
               <p class="download-hint">
-                Arquivo em alta definição para impressão ou papel de parede, com certificado e assinatura HMAC-SHA256 embutidos.
+                Pôster A4 em 300 DPI para impressão. Cada download gera um exemplar oficial exclusivo com numeração e assinatura HMAC-SHA256 nos metadados.
               </p>
               <div class="poster-back-nav">
                 <button class="btn btn-outline" id="btnBackToPlanet">
@@ -371,57 +435,6 @@
         </section>
       </div>
 
-      <!-- ========================================== -->
-      <!-- VIEW 4: CURADORIA SEMANAL (Exclusivo Autor)-->
-      <!-- ========================================== -->
-      <div class="view-page" id="viewCuradoria" style="display: none;">
-        <section class="curadoria-section" id="curadoriaSection">
-          <div class="curadoria-header">
-            <div class="curadoria-badge-row">
-              <span class="badge-status-gold">🛰️ OBSERVATÓRIO DO AUTOR</span>
-              <span class="badge-status-pulsing">GRADE DE CURADORIA SEMANAL</span>
-            </div>
-            <h2 class="curadoria-title">PAINEL DE CURADORIA SEMANAL</h2>
-            <p class="curadoria-subtitle">
-              Inspeção antecipada dos 7 exoplanetas da primeira semana.
-              Os pôsteres abaixo são gerados pelo motor oficial com a numeração sequencial de <strong>ISSUE</strong>, a plaqueta amarela e o selo cósmico da NASA.
-            </p>
-          </div>
-
-          <!-- Grade Seletora dos 7 Dias da Semana -->
-          <div class="curadoria-week-grid" id="curadoriaWeekGrid">
-            <!-- Cards dos 7 dias inseridos dinamicamente -->
-          </div>
-
-          <!-- Área de Exibição do Pôster em Destaque -->
-          <div class="curadoria-preview-stage" id="curadoriaPreviewStage">
-            <div class="stage-info-header">
-              <div class="stage-planet-details">
-                <div class="stage-badges-row">
-                  <span class="stage-day-badge" id="stageDayBadge">Segunda-feira</span>
-                  <span class="stage-issue-badge" id="stageIssueBadge">ISSUE #001</span>
-                  <span class="stage-orientation-badge" id="stageOrientationBadge">Vertical A4</span>
-                </div>
-                <h3 class="stage-planet-name" id="stagePlanetName">HD 189733b</h3>
-                <p class="stage-planet-title" id="stagePlanetTitle">THE RAZOR RAIN HORROR</p>
-              </div>
-              <div class="stage-actions">
-                <button class="btn btn-comic-download" id="stageDownloadBtn">
-                  <span>Baixar Pôster A4 Oficial (PNG)</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Canvas Renderizado do Pôster Oficial -->
-            <div class="curadoria-poster-canvas-box" id="curadoriaPosterBox">
-              <div class="comic-loading-spinner" id="curadoriaSpinner">
-                <span class="spinner-dot"></span>
-                <p>Renderizando pôster oficial com selos e tipografia...</p>
-              </div>
-              <img id="curadoriaPosterImg" alt="Pôster Oficial da Coleção" style="display: none;" />
-            </div>
-          </div>
-        </section>
       </div>
     </main>
 
@@ -469,6 +482,98 @@
         </div>
       </div>
     </footer>
+
+    <!-- Modal de Autenticação Segura do Observatório -->
+    <div class="auth-modal-overlay" id="authModal" style="display: none;">
+      <div class="auth-modal-card">
+        <div class="auth-modal-header">
+          <div class="auth-modal-title-box">
+            <span class="auth-icon">🛰️</span>
+            <h3>Acesso do Curador</h3>
+          </div>
+          <button class="auth-modal-close" id="authModalClose" aria-label="Fechar">&times;</button>
+        </div>
+        <p class="auth-modal-desc">
+          Informe a chave confidencial do Observatório para descriptografar os registros e a curadoria semanal.
+        </p>
+        <form id="authForm" class="auth-form" autocomplete="off">
+          <div class="auth-input-wrapper">
+            <input type="password" id="authPasswordInput" placeholder="Chave de Acesso Confidencial" required autocomplete="current-password" />
+            <button type="button" id="authToggleVisibility" class="btn-toggle-vis" title="Mostrar/Ocultar Senha">👁️</button>
+          </div>
+          <div id="authErrorMessage" class="auth-error-msg" style="display: none;"></div>
+          <button type="submit" class="btn btn-accent auth-submit-btn" id="authSubmitBtn">
+            <span>Descriptografar Vault</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal de Emissão do Colecionador (Tiragem Numerada) -->
+    <div class="auth-modal-overlay" id="collectorMintModal" style="display: none;">
+      <div class="auth-modal-card mint-modal-card">
+        <div class="auth-modal-header">
+          <div class="auth-modal-title-box">
+            <span class="auth-icon">🪙</span>
+            <div>
+              <h3>Certificado Oficial de Posse</h3>
+              <p class="mint-modal-sub">CASA DA MOEDA CÓSMICA &bull; DROP DIÁRIO</p>
+            </div>
+          </div>
+          <button class="auth-modal-close" id="closeMintModalBtn" aria-label="Fechar">&times;</button>
+        </div>
+
+        <div class="mint-edition-preview-card">
+          <div class="mint-badge-row">
+            <span class="mint-edition-tag" id="modalMintEdition">EXEMPLAR Nº #0001</span>
+            <span class="mint-quality-tag">300 DPI &bull; MASTER ORIGINAL</span>
+          </div>
+          <h4 class="mint-planet-heading" id="modalMintPlanet">HD 189733b</h4>
+          <p class="mint-token-hint" id="modalTokenHint">Chave criptográfica HMAC-SHA256 gerada exclusivamente para este download.</p>
+        </div>
+
+        <form id="collectorMintForm" class="auth-form mint-form" autocomplete="off">
+          <div class="mint-form-group">
+            <label for="collectorNameInput" class="mint-input-label">Nome ou Codinome do Titular (Opcional):</label>
+            <input 
+              type="text" 
+              id="collectorNameInput" 
+              class="mint-text-input" 
+              placeholder="Ex: Lucas Gomes ou Comandante Silva" 
+              maxlength="45"
+            />
+            <span class="mint-help-text">Se deixar em branco, será emitido como "Colecionador Oficial".</span>
+          </div>
+
+          <div class="mint-guarantees">
+            <div class="guarantee-item highlight-pack">
+              <span class="g-icon">🎁</span>
+              <span><strong>Pacote Duplo de Coleção:</strong> Você recebe o Pôster A4 + a Foto Oficial de Telemetria 3D</span>
+            </div>
+            <div class="guarantee-item">
+              <span class="g-icon">🛡️</span>
+              <span>Posse e numeração gravadas nos metadados binários ocultos (chunks <code>tEXt</code>)</span>
+            </div>
+            <div class="guarantee-item">
+              <span class="g-icon">🔍</span>
+              <span>Auditoria via terminal com verificação de chave: <code>npm run verify-poster</code></span>
+            </div>
+            <div class="guarantee-item">
+              <span class="g-icon">🎨</span>
+              <span>Resolução máxima 300 DPI sem compressão e sem marcas d'água</span>
+            </div>
+          </div>
+
+          <div id="mintErrorMessage" class="auth-error-msg" style="display: none;"></div>
+
+          <button type="submit" class="btn mint-submit-btn" id="confirmMintBtn">
+            <span>Emitir Exemplar & Baixar Pôster</span>
+            <span class="btn-arrow">↓</span>
+          </button>
+        </form>
+      </div>
+    </div>
   </div>
 
   <script type="module" src="/src/main.js"></script>

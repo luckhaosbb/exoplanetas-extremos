@@ -18,10 +18,12 @@
 
 ### Core Features:
 1. **3D Telemetry CRT Sensor (Retro-futuristic Aesthetic):** Interactive spherical physics renderer with damped angular inertia, 3D dynamic lighting, scanlines, and custom atmospheric relief shaders unique to each world (Mach 7 silicate rain, stellar plasma, molten iron deluges, etc.).
-2. **Vintage Comic Book A4 Poster (300 DPI):** Procedural artwork generator delivering classic vintage comic covers, automatically stamping issue sequencing (`ISSUE #001`, `ISSUE #002`), embossed bespoke typography, Ben-Day halftone grids, and cosmic approval stamps.
+2. **Vintage Comic Full-Bleed A4 Poster (300 DPI):** Procedural artwork generator delivering classic vintage comic splash art in **100% Full-Bleed borderless format** (no paper margins or framing boxes), automatically stamping issue sequencing (`ISSUE #001`, `ISSUE #002`), embossed bespoke typography, Ben-Day halftone grids, and cosmic approval stamps.
 3. **Invisible Cryptographic Watermark (NFT-like Provenance):** W3C standard binary chunk injection (`tEXt` chunks with CRC-32 integrity validation) directly into the generated PNG file stream. Server-side digital signatures utilize **HMAC-SHA256**, ensuring immutable and verifiable authenticity via the `/api/verify-token` endpoint.
 4. **Daily Tyler Vigen-Style Notifications:** Minimalist, distraction-free newsletter alert system for upcoming daily drops.
 5. **Live Scientific Telemetry:** Asynchronous synchronization with NASA's TAP Exoplanet Archive API for real-time astronomical verification.
+6. **Curator Dashboard (`npm run curadoria`):** Confidential author observation deck to inspect the weekly 7-day queue, preview official posters with live badges, and download authenticated drops in advance.
+7. **Cascade Fallback Chain AI Pipeline:** Autonomous weekly batch generation running every Saturday at 00:00:00 with 4-tier zero-failure redundancy (SiliconFlow -> Cloudflare Workers AI -> Hugging Face -> Pollinations.ai). Detailed in [`ARCHITECTURE_AI_PIPELINE.md`](ARCHITECTURE_AI_PIPELINE.md).
 
 ---
 
@@ -30,25 +32,38 @@
 The backend is built following **Layered Clean Architecture** and strictly adheres to the five **SOLID** principles:
 
 ```
-server/
-├── config/                  # Centralized typed environment configurations
-│   └── index.js
-├── data/                    # Astronomical catalog and resilient local storage
-│   ├── exoplanets.js
-│   ├── published_planets.json
-│   └── subscribers.json
-├── repositories/            # Data Access Layer (Persistence)
-│   ├── database.js          # PostgreSQL Connection Pool with auto-migrating DDL
-│   ├── planetRepository.js  # Exoplanet queries and mutations abstraction
-│   └── subscriberRepository.js # Subscriber queries and mutations abstraction
-├── services/                # Business Logic Layer
-│   ├── cryptoService.js     # HMAC-SHA256 signature generation and validation
-│   ├── planetService.js     # Daily drop rotation orchestration without repetition
-│   └── subscriberService.js # RFC email validation and subscription sanitization
+Daily Exoplanets/
+├── ARCHITECTURE_AI_PIPELINE.md  # Deep dive into AI cascade and weekly cron automation
+├── DOCUMENTO_DE_VISAO.md        # Product vision, requirements & design specs
+├── FSD.md                       # Functional Specification Document (FSD)
+├── server/
+│   ├── assets/planets/          # Confidential official full-bleed master artworks
+│   ├── config/                  # Centralized typed environment configurations
+│   ├── data/                    # Astronomical catalog, prompts and persistent storage
+│   │   ├── exoplanets.js
+│   │   ├── prompts.js           # 100% Full-Bleed 1970s retro pulp prompt templates
+│   │   ├── published_planets.json
+│   │   ├── poster_mints.json    # Numbered collector mintage logs
+│   │   └── subscribers.json
+│   ├── repositories/            # Data Access Layer (Persistence)
+│   │   ├── database.js          # PostgreSQL Connection Pool with auto-migrating DDL
+│   │   ├── mintRepository.js    # Numbered mintage and ownership persistence
+│   │   ├── planetRepository.js  # Exoplanet queries and mutations abstraction
+│   │   └── subscriberRepository.js # Subscriber queries and mutations abstraction
+│   ├── services/                # Business Logic Layer
+│   │   ├── aiImageService.js    # 5-tier Cascade Fallback Chain AI generation
+│   │   ├── authService.js       # Curator HMAC-SHA256 token issuance & validation
+│   │   ├── cronService.js       # Weekly Saturday midnight automation scheduler
+│   │   ├── cryptoService.js     # HMAC-SHA256 signature generation and validation
+│   │   ├── planetService.js     # Daily drop rotation orchestration without repetition
+│   │   └── subscriberService.js # RFC email validation and subscription sanitization
 ├── controllers/             # Presentation Layer (HTTP API Controllers)
+│   ├── authController.js
 │   ├── cryptoController.js
 │   ├── planetController.js
 │   └── subscriberController.js
+├── middlewares/             # Security & authentication guards
+│   └── authMiddleware.js
 ├── routes/                  # Decoupled Express routing
 │   └── api.js
 └── server.js                # Express bootstrap, security middlewares, and SPA static hosting
@@ -71,18 +86,40 @@ The application employs a **hybrid resilience architecture**:
 
 ---
 
-## 🔐 Cryptographic Poster Specification
+## 🔐 Protocolo de Tiragem Numerada & Certificação Criptográfica (Numbered Collector Mintage)
 
-When generating the A4 PNG poster download, the generator injects standardized binary chunks immediately preceding the `IEND` marker:
+Diferente de sistemas que restringem o acesso ao arquivo com marcas d'água ou bloqueios artificiais, o **Exoplanetas Extremos** adota o modelo clássico de **Litografia Digital / Gravura Numerada de Colecionador**:
 
-| PNG Chunk Key | Description |
+- **Acesso Universal & Qualidade Máxima:** Qualquer visitante pode baixar a arte original em resolução máxima (A4 300 DPI, sem marcas d'água, sem paywalls).
+- **Exemplar Oficial Exclusivo:** Cada download emite atômica e sequencialmente o próximo número de tiragem do drop diário (`#0001`, `#0002`, `#0042`...).
+- **Titularidade Registrada:** O visitante pode registrar seu nome ou codinome de colecionador (ou optar por emissão anônima oficial).
+- **Assinatura HMAC-SHA256:** O servidor assina matematicamente a tupla `(Exoplaneta + Data + Número de Série + Nome do Titular + Entropia)` com sua chave privada mestre.
+- **Injeção Binária Invisível (Chunks tEXt):** O motor de renderização client-side (`ComicBannerGenerator`) sintetiza o PNG e injeta a certidão invisível antes do marcador `IEND`, com verificação de integridade CRC-32.
+- **Arte Visual 100% Pura:** A arte permanece completamente limpa e cinematográfica, sem nenhum texto de código, hash ou carimbo poluindo o desenho. Toda a posse reside nos metadados binários oficiais.
+
+### Especificação dos Chunks PNG Binários:
+
+| Chave do Chunk `tEXt` | Descrição do Dado |
 | :--- | :--- |
-| `NFT_Token_ID` | Unique drop series identifier (`TOKEN#EXO-YYYYMMDD-XXXXXX`) |
-| `HMAC_Signature` | Cryptographic signature computed on the server using private key |
-| `Exoplanet_ID` | Astronomical catalog identifier (e.g., `hd-189733b`) |
-| `Drop_Date` | Official drop date timestamp (`YYYY-MM-DD`) |
-| `Authenticity` | Official statement of digital provenance |
+| `Exoplanet_ID` | Identificador único do exoplaneta no catálogo astronômico (ex: `hd-189733b`) |
+| `Exoplanet_Name` | Nome astronômico oficial (ex: `HD 189733b`) |
+| `Title` | Título temático da capa estilo gibi (ex: `THE RAZOR RAIN HORROR`) |
+| `Drop_Date` | Data oficial do drop diário (`YYYY-MM-DD`) |
+| `Mint_Number` | Número sequencial do exemplar emitido (ex: `EDIÇÃO #0001`) |
+| `Collector_Name` | Nome ou codinome registrado do titular/colecionador |
+| `NFT_Token_ID` | Token de identificação único (`TOKEN#EXO-YYYYMMDD-0001-XXXX`) |
+| `HMAC_Signature` | Assinatura criptográfica calculada no servidor com chave privada (`SHA256:...`) |
+| `Serial_Entropy` | Entropia aleatória de 8 caracteres para proteção contra colisões |
+| `Authenticity` | Declaração oficial de proveniência cósmica |
+| `Verification_Endpoint` | Rota pública para validação de autenticidade (`/api/verify-token`) |
 | `Developer` | Lucas Gomes (github.com/luckhaosbb) |
+| `Timestamp` | Carimbo ISO 8601 exato de emissão |
+
+### Auditoria Criptográfica via Linha de Comando (CLI):
+```bash
+npm run verify-poster "caminho/para/seu-poster.png"
+```
+A ferramenta lê diretamente a estrutura binária do arquivo PNG, decodifica os chunks `tEXt` e calcula a assinatura contra a chave do servidor, informando o número da tiragem, o nome do titular e se o arquivo é autêntico ou adulterado.
 
 ---
 
@@ -125,6 +162,12 @@ CURADORIA_SECRET=obs_k7x9m2_luckhaos
 npm run dev
 ```
 Launches both the Express backend server (port `3001`) and the Vite frontend with Hot Module Replacement (port `5173`).
+
+### Weekly Curator Dashboard (Author Access)
+```bash
+npm run curadoria
+```
+Generates a secure HMAC-SHA256 session token and opens the confidential author dashboard in your default browser to inspect upcoming exoplanets, preview live A4 comic banners, and download high-resolution authenticated drops.
 
 ### Production Build & Execution
 ```bash

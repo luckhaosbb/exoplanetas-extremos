@@ -22,6 +22,7 @@ export class PlanetRenderer {
 
     // Modo Sensor Térmico (ativado por CTRL, T ou clique)
     this.isThermalMode = false;
+    this.hideAngleText = false;
 
     this.init();
   }
@@ -225,17 +226,19 @@ export class PlanetRenderer {
     ctx.lineTo(centerX, centerY + 12);
     ctx.stroke();
 
-    // Telemetria discreta no HUD do canvas
-    ctx.font = '11px "JetBrains Mono", monospace';
-    const degrees = Math.round(((this.rotation % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI));
-    
-    if (this.isThermalMode) {
-      ctx.fillStyle = 'rgba(255, 140, 40, 0.95)';
-      ctx.fillText(`FLIR TÉRMICO: ${this.planet.tempC} °C`, 14, 22);
-      ctx.fillText(`ÂNGULO: ${degrees}°`, 14, this.height - 14);
-    } else {
-      ctx.fillStyle = 'rgba(0, 240, 255, 0.6)';
-      ctx.fillText(`ÂNGULO: ${degrees}°`, 14, this.height - 14);
+    // Telemetria discreta no HUD do canvas (oculta durante captura limpa para download de fotos)
+    if (!this.hideAngleText) {
+      ctx.font = '11px "JetBrains Mono", monospace';
+      const degrees = Math.round(((this.rotation % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI));
+      
+      if (this.isThermalMode) {
+        ctx.fillStyle = 'rgba(255, 140, 40, 0.95)';
+        ctx.fillText(`FLIR TÉRMICO: ${this.planet.tempC} °C`, 14, 22);
+        ctx.fillText(`ÂNGULO: ${degrees}°`, 14, this.height - 14);
+      } else {
+        ctx.fillStyle = 'rgba(0, 240, 255, 0.6)';
+        ctx.fillText(`ÂNGULO: ${degrees}°`, 14, this.height - 14);
+      }
     }
 
     ctx.restore();
@@ -529,6 +532,58 @@ export class PlanetRenderer {
     this.drawParticles(centerX, centerY, radius);
 
     this.animId = requestAnimationFrame(() => this.render());
+  }
+
+  /**
+   * Captura uma renderização de altíssima definição (targetSize x targetSize)
+   * limpa para download de foto, sem a indicação de ÂNGULO.
+   */
+  captureCleanSnapshot(targetSize = 1112) {
+    const offCanvas = document.createElement('canvas');
+    offCanvas.width = targetSize;
+    offCanvas.height = targetSize;
+    const offCtx = offCanvas.getContext('2d');
+
+    const origCtx = this.ctx;
+    const origW = this.width;
+    const origH = this.height;
+    const origHide = this.hideAngleText;
+
+    this.ctx = offCtx;
+    this.width = targetSize;
+    this.height = targetSize;
+    this.hideAngleText = true;
+
+    const centerX = targetSize / 2;
+    const centerY = targetSize / 2;
+    const radius = targetSize * 0.28;
+
+    this.drawBackground();
+    this.drawHudOverlay(centerX, centerY, radius);
+    this.drawAtmosphereGlow(radius, centerX, centerY);
+    this.drawPlanetBody(radius, centerX, centerY);
+
+    // Escala e renderiza partículas na resolução total
+    const scaleFactor = targetSize / (origW || 400);
+    offCtx.save();
+    this.particles.forEach(p => {
+      offCtx.save();
+      offCtx.fillStyle = p.color;
+      offCtx.globalAlpha = p.opacity;
+      offCtx.beginPath();
+      offCtx.arc(p.x * scaleFactor, p.y * scaleFactor, Math.max(1, p.size * scaleFactor * 0.75), 0, Math.PI * 2);
+      offCtx.fill();
+      offCtx.restore();
+    });
+    offCtx.restore();
+
+    // Restaura estado original para o loop de animação da tela continuar sem interrupção
+    this.ctx = origCtx;
+    this.width = origW;
+    this.height = origH;
+    this.hideAngleText = origHide;
+
+    return offCanvas;
   }
 
   destroy() {

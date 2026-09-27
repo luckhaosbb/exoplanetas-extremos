@@ -48,6 +48,41 @@ export const planetRepository = {
     return list.map(item => item.planet_id);
   },
 
+  async getOfficiallyReleasedPlanetIds(currentDateStr) {
+    if (isPostgres()) {
+      try {
+        const pool = getPool();
+        const res = await pool.query(
+          'SELECT planet_id FROM published_planets WHERE published_date <= $1',
+          [currentDateStr]
+        );
+        return res.rows.map(r => r.planet_id);
+      } catch (err) {
+        console.error('Erro ao consultar planetas liberados no PostgreSQL:', err.message);
+      }
+    }
+
+    const list = readLocalDb();
+    return list
+      .filter(item => item.published_date <= currentDateStr)
+      .map(item => item.planet_id);
+  },
+
+  async getAllRecords() {
+    if (isPostgres()) {
+      try {
+        const pool = getPool();
+        const res = await pool.query('SELECT * FROM published_planets ORDER BY published_date ASC');
+        return res.rows;
+      } catch (err) {
+        console.error('Erro ao consultar todos os registros no PostgreSQL:', err.message);
+      }
+    }
+
+    const list = readLocalDb();
+    return [...list].sort((a, b) => a.published_date.localeCompare(b.published_date));
+  },
+
   async save({ planetId, planetName, dateStr, bannerOrientation = 'vertical', bannerData = null }) {
     if (isPostgres()) {
       try {
@@ -135,5 +170,27 @@ export const planetRepository = {
 
     writeLocalDb([]);
     return true;
+  },
+
+  async seedDefaultPlanets() {
+    const defaultPlanets = [
+      { planetId: 'hd-189733b', planetName: 'HD 189733b', dateStr: '2026-09-28', bannerOrientation: 'horizontal' },
+      { planetId: 'kelt-9b', planetName: 'KELT-9b', dateStr: '2026-09-29', bannerOrientation: 'vertical' },
+      { planetId: 'wasp-76b', planetName: 'WASP-76b', dateStr: '2026-09-30', bannerOrientation: 'vertical' },
+      { planetId: 'tres-2b', planetName: 'TrES-2b', dateStr: '2026-10-01', bannerOrientation: 'vertical' },
+      { planetId: 'wasp-12b', planetName: 'WASP-12b', dateStr: '2026-10-02', bannerOrientation: 'horizontal' },
+      { planetId: '55-cancri-e', planetName: '55 Cancri e (Janssen)', dateStr: '2026-10-03', bannerOrientation: 'vertical' },
+      { planetId: 'psr-b1257-12c', planetName: 'PSR B1257+12c (Poltergeist)', dateStr: '2026-10-04', bannerOrientation: 'vertical' },
+      { planetId: 'gj-1214b', planetName: 'GJ 1214b', dateStr: '2026-10-05', bannerOrientation: 'horizontal' }
+    ];
+
+    const currentCount = await this.count();
+    if (currentCount < 8) {
+      console.log('🪐 [DATABASE SEED] Inicializando grade homologada dos 8 primeiros exoplanetas...');
+      for (const p of defaultPlanets) {
+        await this.save(p);
+      }
+      console.log('✅ [DATABASE SEED] Grade oficial de 8 exoplanetas garantida no banco de dados.');
+    }
   }
 };

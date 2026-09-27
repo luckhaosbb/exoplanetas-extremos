@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/curadoria
+Disallow: /api/save-banner
+Disallow: /api/reset-planets
+
+Sitemap: https://exoplanets.luckhaosbb.dev/sitemap.xml

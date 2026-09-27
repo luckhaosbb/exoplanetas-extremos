@@ -1,1 +1,74 @@
-[]
+[
+  {
+    "id": 1,
+    "planet_id": "hd-189733b",
+    "planet_name": "HD 189733b",
+    "published_date": "2026-09-28",
+    "banner_orientation": "horizontal",
+    "banner_data": null,
+    "created_at": "2026-09-27T00:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "planet_id": "kelt-9b",
+    "planet_name": "KELT-9b",
+    "published_date": "2026-09-29",
+    "banner_orientation": "vertical",
+    "banner_data": null,
+    "created_at": "2026-09-27T00:00:00.000Z"
+  },
+  {
+    "id": 3,
+    "planet_id": "wasp-76b",
+    "planet_name": "WASP-76b",
+    "published_date": "2026-09-30",
+    "banner_orientation": "vertical",
+    "banner_data": null,
+    "created_at": "2026-09-27T00:00:00.000Z"
+  },
+  {
+    "id": 4,
+    "planet_id": "tres-2b",
+    "planet_name": "TrES-2b",
+    "published_date": "2026-10-01",
+    "banner_orientation": "vertical",
+    "banner_data": null,
+    "created_at": "2026-09-27T00:00:00.000Z"
+  },
+  {
+    "id": 5,
+    "planet_id": "wasp-12b",
+    "planet_name": "WASP-12b",
+    "published_date": "2026-10-02",
+    "banner_orientation": "horizontal",
+    "banner_data": null,
+    "created_at": "2026-09-27T00:00:00.000Z"
+  },
+  {
+    "id": 6,
+    "planet_id": "55-cancri-e",
+    "planet_name": "55 Cancri e (Janssen)",
+    "published_date": "2026-10-03",
+    "banner_orientation": "vertical",
+    "banner_data": null,
+    "created_at": "2026-09-27T00:00:00.000Z"
+  },
+  {
+    "id": 7,
+    "planet_id": "psr-b1257-12c",
+    "planet_name": "PSR B1257+12c (Poltergeist)",
+    "published_date": "2026-10-04",
+    "banner_orientation": "vertical",
+    "banner_data": null,
+    "created_at": "2026-09-27T00:00:00.000Z"
+  },
+  {
+    "id": 8,
+    "planet_id": "gj-1214b",
+    "planet_name": "GJ 1214b",
+    "published_date": "2026-10-05",
+    "banner_orientation": "horizontal",
+    "banner_data": null,
+    "created_at": "2026-09-27T00:00:00.000Z"
+  }
+]

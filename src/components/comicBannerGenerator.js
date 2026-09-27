@@ -54,6 +54,9 @@ export class ComicBannerGenerator {
     this.planet = planetData;
     this.orientation = orientation || planetData.bannerOrientation || 'vertical';
     this.certificate = cryptoCertificate || planetData.cryptoCertificate || null;
+    this.mintNumber = this.certificate?.mintNumber || planetData.mintNumber || 1;
+    this.collectorName = this.certificate?.collectorName || planetData.collectorName || 'Colecionador Oficial';
+    this.mintLabel = this.certificate?.mintLabel || `EDIÇÃO #${String(this.mintNumber).padStart(4, '0')}`;
     this.canvas = document.createElement('canvas');
     this.ctx = this.canvas.getContext('2d');
     
@@ -145,12 +148,19 @@ export class ComicBannerGenerator {
 
     // Chunks de metadados NFT-like para provar a autenticidade
     const nowIso = new Date().toISOString();
+    const dropDate = this.certificate?.dateStr 
+      || (this.cryptoToken && this.cryptoToken.match(/TOKEN#EXO-(\d{4})(\d{2})(\d{2})-/) ? `${RegExp.$1}-${RegExp.$2}-${RegExp.$3}` : null)
+      || this.planet.scheduledDate 
+      || (this.certificate?.issuedAt ? this.certificate.issuedAt.slice(0, 10) : nowIso.slice(0, 10));
+
     const metadataChunks = [
       createPngTextChunk('Exoplanet_ID', this.planet.id),
       createPngTextChunk('Exoplanet_Name', this.planet.name),
       createPngTextChunk('Title', this.planet.comicHeroTitle || 'THE COSMIC HORROR'),
       createPngTextChunk('Subtitle', this.planet.title || ''),
-      createPngTextChunk('Drop_Date', this.certificate?.issuedAt ? this.certificate.issuedAt.slice(0, 10) : nowIso.slice(0, 10)),
+      createPngTextChunk('Drop_Date', dropDate),
+      createPngTextChunk('Mint_Number', this.mintLabel || `#${String(this.mintNumber).padStart(4, '0')}`),
+      createPngTextChunk('Collector_Name', this.collectorName || 'Colecionador Oficial'),
       createPngTextChunk('NFT_Token_ID', this.cryptoToken),
       createPngTextChunk('HMAC_Signature', this.certificate?.signature || 'LOCAL_STANDALONE_BUILD'),
       createPngTextChunk('Serial_Entropy', this.certificate?.serial || 'LOCAL_ENTROPY'),
@@ -210,8 +220,8 @@ export class ComicBannerGenerator {
     // 2. Efeito de Meio-Tom / Retícula Ben-Day Dots
     this.drawHalftoneOverlay(ctx, w, h);
 
-    // 3. Moldura de Quadrinhos Vintage & Borda Envelhecida
-    this.drawVintageBorders(ctx, w, h);
+    // 3. Moldura externa removida para posicionar badges diretamente nas bordas do pôster
+    // (O quadro anterior que restringia os badges foi desativado a pedido do curador)
 
     // 4. Selo Vintage "Approved by Cosmic Archive Authority" (Canto Superior Direito)
     this.drawComicsCodeSeal(ctx, w, h, isHoriz);
@@ -487,11 +497,11 @@ export class ComicBannerGenerator {
   // Selo Vintage no Canto Superior Direito: "APPROVED BY THE COSMIC ARCHIVE AUTHORITY NASA"
   drawComicsCodeSeal(ctx, w, h, isHoriz) {
     ctx.save();
-    const margin = 56;
+    const margin = 20;
     const sealW = 160;
     const sealH = 185;
-    const sealX = w - margin - sealW - 20;
-    const sealY = margin + 20;
+    const sealX = w - margin - sealW;
+    const sealY = margin;
 
     // Fundo branco e borda preta
     ctx.fillStyle = '#ffffff';
@@ -521,14 +531,26 @@ export class ComicBannerGenerator {
     ctx.restore();
   }
 
-  // Box retrô no Canto Superior Esquerdo: "ISSUE #001 - EXTREME WORLDS DAILY" (Sem preço)
+  // Box retrô no Canto Superior Esquerdo: apenas "ISSUE #001" com o retângulo ajustado à palavra e número
   drawIssueBox(ctx, w, h, isHoriz) {
     ctx.save();
-    const margin = 56;
-    const boxX = margin + 20;
-    const boxY = margin + 20;
-    const boxW = 185;
-    const boxH = 155;
+    const margin = 20;
+    const num = this.issueNumber || this.planet.issueNumber || 1;
+    const issueStr = `ISSUE #${String(num).padStart(3, '0')}`;
+
+    const fontSize = 22;
+    ctx.font = `900 ${fontSize}px "JetBrains Mono", monospace`;
+
+    const textMetrics = ctx.measureText(issueStr);
+    const textWidth = textMetrics.width;
+
+    const padX = 24;
+    const padY = 14;
+    const boxW = textWidth + padX * 2;
+    const boxH = fontSize + padY * 2;
+
+    const boxX = margin;
+    const boxY = margin;
 
     ctx.fillStyle = '#ffeb3b';
     ctx.strokeStyle = '#000000';
@@ -537,19 +559,9 @@ export class ComicBannerGenerator {
     ctx.strokeRect(boxX, boxY, boxW, boxH);
 
     ctx.textAlign = 'center';
-
-    const num = this.issueNumber || this.planet.issueNumber || 1;
-    const issueStr = `ISSUE #${String(num).padStart(3, '0')}`;
-
+    ctx.textBaseline = 'middle';
     ctx.fillStyle = '#e62429';
-    ctx.font = '900 22px "JetBrains Mono", monospace';
-    ctx.fillText(issueStr, boxX + boxW / 2, boxY + 44);
-
-    ctx.fillStyle = '#000000';
-    ctx.font = '900 18px "Outfit", sans-serif';
-    ctx.fillText('EXTREME', boxX + boxW / 2, boxY + 78);
-    ctx.fillText('WORLDS', boxX + boxW / 2, boxY + 104);
-    ctx.fillText('DAILY', boxX + boxW / 2, boxY + 130);
+    ctx.fillText(issueStr, boxX + boxW / 2, boxY + boxH / 2 + 1);
 
     ctx.restore();
   }
@@ -557,7 +569,7 @@ export class ComicBannerGenerator {
   // Placa com o Nome Oficial do Exoplaneta no Canto Inferior Esquerdo (Estilo Comic)
   drawPlanetNamePlate(ctx, w, h, isHoriz) {
     ctx.save();
-    const margin = 56;
+    const margin = 20;
     const name = this.planet.name;
 
     // Tamanho proporcional à alta resolução de impressão (300 DPI)
@@ -572,8 +584,8 @@ export class ComicBannerGenerator {
     const boxW = textWidth + padX * 2;
     const boxH = fontSize + padY * 2;
 
-    const boxX = margin + 18;
-    const boxY = h - margin - 18 - boxH;
+    const boxX = margin;
+    const boxY = h - margin - boxH;
 
     // Fundo amarelo clássico de gibi vintage
     ctx.fillStyle = '#ffeb3b';

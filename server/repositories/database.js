@@ -10,6 +10,7 @@ const DATA_DIR = path.join(__dirname, '..', 'data');
 
 export const LOCAL_DB_PATH = path.join(DATA_DIR, 'published_planets.json');
 export const SUBSCRIBERS_PATH = path.join(DATA_DIR, 'subscribers.json');
+export const POSTER_MINTS_PATH = path.join(DATA_DIR, 'poster_mints.json');
 
 // Garante a existência do diretório de dados e arquivos locais
 if (!fs.existsSync(DATA_DIR)) {
@@ -20,6 +21,9 @@ if (!fs.existsSync(LOCAL_DB_PATH)) {
 }
 if (!fs.existsSync(SUBSCRIBERS_PATH)) {
   fs.writeFileSync(SUBSCRIBERS_PATH, JSON.stringify([], null, 2), 'utf-8');
+}
+if (!fs.existsSync(POSTER_MINTS_PATH)) {
+  fs.writeFileSync(POSTER_MINTS_PATH, JSON.stringify([], null, 2), 'utf-8');
 }
 
 let pool = null;
@@ -52,6 +56,20 @@ export async function initDatabase() {
           id SERIAL PRIMARY KEY,
           email VARCHAR(255) NOT NULL UNIQUE,
           created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS poster_mints (
+          id SERIAL PRIMARY KEY,
+          planet_id VARCHAR(100) NOT NULL,
+          date_str VARCHAR(10) NOT NULL,
+          mint_number INTEGER NOT NULL,
+          collector_name VARCHAR(150) NOT NULL,
+          token_id VARCHAR(100) NOT NULL UNIQUE,
+          signature VARCHAR(100) NOT NULL,
+          serial_entropy VARCHAR(50) NOT NULL,
+          ip_hash VARCHAR(64),
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          CONSTRAINT unique_planet_date_mint UNIQUE (planet_id, date_str, mint_number)
         );
       `);
 

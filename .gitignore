@@ -35,3 +35,8 @@ public/assets/planets/*
 !public/assets/planets/.gitkeep
 dist/assets/planets/*
 
+# Runtime Database & User Data (PII / Privacy Protection)
+server/data/poster_mints.json
+server/data/extended_planets.json
+
+
