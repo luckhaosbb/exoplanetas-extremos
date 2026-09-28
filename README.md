@@ -3,17 +3,17 @@
 <div align="center">
 
 [![Website](https://img.shields.io/badge/🌐_VISIT_LIVE_WEBSITE-exoplanets.luckhaosbb.dev-00f0ff?style=for-the-badge&logo=googlechrome&logoColor=black)](https://exoplanets.luckhaosbb.dev/)
-[![Status](https://img.shields.io/badge/STATUS-ONLINE%20%2F%20PRODUCTION-success?style=for-the-badge)](https://exoplanets.luckhaosbb.dev/)
+[![Status](https://img.shields.io/badge/STATUS-ONLINE%20%2F%20LIVE-success?style=for-the-badge)](https://exoplanets.luckhaosbb.dev/)
 [![NASA TAP API](https://img.shields.io/badge/NASA%20TAP-LIVE%20SYNC-informational?style=for-the-badge&logo=nasa)](https://exoplanets.luckhaosbb.dev/)
 
-### 🚀 **Acesse o Observatório em Produção:**  
+### 🚀 **Visit the Live Observatory:**  
 # 👉 **[https://exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/)** 👈
 
 *Explore daily extreme exoplanets, interactive 3D retro CRT orbital telemetry, and mint your authenticated A4 vintage comic poster before midnight.*
 
 ---
 
-[![Production Web](https://img.shields.io/badge/Live_URL-https%3A%2F%2Fexoplanets.luckhaosbb.dev-00f0ff.svg?style=flat-square&logo=firefoxbrowser)](https://exoplanets.luckhaosbb.dev/)
+[![Live Website](https://img.shields.io/badge/Live_URL-https%3A%2F%2Fexoplanets.luckhaosbb.dev-00f0ff.svg?style=flat-square&logo=firefoxbrowser)](https://exoplanets.luckhaosbb.dev/)
 [![Node.js](https://img.shields.io/badge/Node.js-v20+-green.svg?style=flat-square&logo=node.js)](https://nodejs.org/)
 [![Express.js](https://img.shields.io/badge/Express-4.21-lightgrey.svg?style=flat-square&logo=express)](https://expressjs.com/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF.svg?style=flat-square&logo=vite)](https://vitejs.dev/)
@@ -40,8 +40,7 @@
 3. **Invisible Cryptographic Watermark (NFT-like Provenance):** W3C standard binary chunk injection (`tEXt` chunks with CRC-32 integrity validation) directly into the generated PNG file stream. Server-side digital signatures utilize **HMAC-SHA256**, ensuring immutable and verifiable authenticity via the `/api/verify-token` endpoint.
 4. **Daily Tyler Vigen-Style Notifications:** Minimalist, distraction-free newsletter alert system for upcoming daily drops.
 5. **Live Scientific Telemetry:** Asynchronous synchronization with NASA's TAP Exoplanet Archive API for real-time astronomical verification.
-6. **Curator Dashboard (`npm run curadoria`):** Confidential author observation deck to inspect the weekly 7-day queue, preview official posters with live badges, and download authenticated drops in advance.
-7. **Cascade Fallback Chain AI Pipeline:** Autonomous weekly batch generation running every Saturday at 00:00:00 with 4-tier zero-failure redundancy (SiliconFlow -> Cloudflare Workers AI -> Hugging Face -> Pollinations.ai). Detailed in [`ARCHITECTURE_AI_PIPELINE.md`](ARCHITECTURE_AI_PIPELINE.md).
+6. **Cascade Fallback Chain AI Pipeline:** Autonomous weekly batch generation running every Saturday at 00:00:00 with 4-tier zero-failure redundancy (SiliconFlow -> Cloudflare Workers AI -> Hugging Face -> Pollinations.ai). Detailed in [`ARCHITECTURE_AI_PIPELINE.md`](ARCHITECTURE_AI_PIPELINE.md).
 
 ---
 
@@ -105,68 +104,68 @@ The application employs a **hybrid resilience architecture**:
 
 ---
 
-## 🔐 Protocolo de Tiragem Numerada & Certificação Criptográfica (Numbered Collector Mintage)
+## 🔐 Numbered Collector Mintage & Cryptographic Certification Protocol
 
-Diferente de sistemas que restringem o acesso ao arquivo com marcas d'água ou bloqueios artificiais, o **Exoplanetas Extremos** adota o modelo clássico de **Litografia Digital / Gravura Numerada de Colecionador**:
+Unlike systems that restrict file access with watermarks or artificial paywalls, **Extreme Exoplanets** adopts the traditional fine-art model of **Numbered Collector Digital Lithographs / Engravings**:
 
-- **Acesso Universal & Qualidade Máxima:** Qualquer visitante pode baixar a arte original em resolução máxima (A4 300 DPI, sem marcas d'água, sem paywalls).
-- **Exemplar Oficial Exclusivo:** Cada download emite atômica e sequencialmente o próximo número de tiragem do drop diário (`#0001`, `#0002`, `#0042`...).
-- **Titularidade Registrada:** O visitante pode registrar seu nome ou codinome de colecionador (ou optar por emissão anônima oficial).
-- **Assinatura HMAC-SHA256:** O servidor assina matematicamente a tupla `(Exoplaneta + Data + Número de Série + Nome do Titular + Entropia)` com sua chave privada mestre.
-- **Injeção Binária Invisível (Chunks tEXt):** O motor de renderização client-side (`ComicBannerGenerator`) sintetiza o PNG e injeta a certidão invisível antes do marcador `IEND`, com verificação de integridade CRC-32.
-- **Arte Visual 100% Pura:** A arte permanece completamente limpa e cinematográfica, sem nenhum texto de código, hash ou carimbo poluindo o desenho. Toda a posse reside nos metadados binários oficiais.
+- **Universal Access & Maximum Fidelity:** Any visitor can freely download original artworks at maximum resolution (A4 300 DPI, unwatermarked, zero paywalls).
+- **Exclusive Official Edition:** Each download atomically and sequentially issues the next mintage number for that daily drop (`#0001`, `#0002`, `#0042`...).
+- **Registered Ownership:** Visitors can register their name or collector codename (or opt for an official anonymous mintage).
+- **HMAC-SHA256 Digital Signature:** The server mathematically signs the tuple `(Exoplanet + Date + Serial Number + Collector Name + Entropy)` using its master private key.
+- **Invisible Binary Injection (tEXt Chunks):** The client-side rendering engine (`ComicBannerGenerator`) synthesizes the PNG and injects the invisible certificate before the `IEND` marker, with CRC-32 integrity validation.
+- **100% Pure Visual Artwork:** The artwork remains completely pristine and cinematic, with zero hashes, code snippets, or distracting stamps cluttering the illustration. Provenance resides entirely within official binary metadata.
 
-### Especificação dos Chunks PNG Binários:
+### Binary PNG Chunks Specification:
 
-| Chave do Chunk `tEXt` | Descrição do Dado |
+| `tEXt` Chunk Key | Data Description |
 | :--- | :--- |
-| `Exoplanet_ID` | Identificador único do exoplaneta no catálogo astronômico (ex: `hd-189733b`) |
-| `Exoplanet_Name` | Nome astronômico oficial (ex: `HD 189733b`) |
-| `Title` | Título temático da capa estilo gibi (ex: `THE RAZOR RAIN HORROR`) |
-| `Drop_Date` | Data oficial do drop diário (`YYYY-MM-DD`) |
-| `Mint_Number` | Número sequencial do exemplar emitido (ex: `EDIÇÃO #0001`) |
-| `Collector_Name` | Nome ou codinome registrado do titular/colecionador |
-| `NFT_Token_ID` | Token de identificação único (`TOKEN#EXO-YYYYMMDD-0001-XXXX`) |
-| `HMAC_Signature` | Assinatura criptográfica calculada no servidor com chave privada (`SHA256:...`) |
-| `Serial_Entropy` | Entropia aleatória de 8 caracteres para proteção contra colisões |
-| `Authenticity` | Declaração oficial de proveniência cósmica |
-| `Verification_Endpoint` | Rota pública para validação de autenticidade (`/api/verify-token`) |
+| `Exoplanet_ID` | Unique astronomical catalog identifier (e.g., `hd-189733b`) |
+| `Exoplanet_Name` | Official astronomical designation (e.g., `HD 189733b`) |
+| `Title` | Comic-style thematic cover title (e.g., `THE RAZOR RAIN HORROR`) |
+| `Drop_Date` | Official daily drop date (`YYYY-MM-DD`) |
+| `Mint_Number` | Sequential edition number issued (e.g., `EDITION #0001`) |
+| `Collector_Name` | Registered name or codename of the collector/owner |
+| `NFT_Token_ID` | Unique identification token (`TOKEN#EXO-YYYYMMDD-0001-XXXX`) |
+| `HMAC_Signature` | Cryptographic signature computed on the server with private key (`SHA256:...`) |
+| `Serial_Entropy` | Random 8-character entropy string for collision protection |
+| `Authenticity` | Official cosmic provenance statement |
+| `Verification_Endpoint` | Public authenticity validation route (`/api/verify-token`) |
 | `Developer` | Lucas Gomes (github.com/luckhaosbb) |
-| `Timestamp` | Carimbo ISO 8601 exato de emissão |
+| `Timestamp` | Exact ISO 8601 issuance timestamp |
 
-### Auditoria Criptográfica de Autenticidade:
+### Cryptographic Authenticity Audit:
 
-#### 1. Via Interface Web (Página do Pôster)
-Diretamente no final da aba do pôster (`#poster`), o usuário conta com a seção **Auditoria de Autenticidade do Pôster**:
-- **Drag & Drop Instantâneo:** O usuário arrasta o arquivo PNG baixado para a dropzone. O navegador extrai os chunks binários `tEXt` localmente via `ArrayBuffer` (em < 10ms, sem upload de arquivos pesados para o servidor) e envia apenas o payload criptográfico para validação.
-- **Validação por Token ID:** Permite pesquisar qualquer exemplar oficial através do seu código `TOKEN#EXO-...`.
-- **Dossiê Criptográfico Holográfico:** Exibe o status da validação (`CERTIFICADO OFICIAL VÁLIDO` ou `ADULTERADO`), número da tiragem, nome do titular registrado, data oficial do drop e confirmação do protocolo HMAC-SHA256.
+#### 1. Via Web Interface (Poster Page)
+Directly at the bottom of the poster tab (`#poster`), visitors have access to the **Poster Authenticity Audit** section:
+- **Instant Drag & Drop:** Users drag the downloaded PNG file into the dropzone. The browser parses binary `tEXt` chunks locally via `ArrayBuffer` (< 10ms, without uploading heavy files to the server) and transmits only the cryptographic payload for verification.
+- **Token ID Lookup:** Allows inspecting any official edition using its `TOKEN#EXO-...` code.
+- **Holographic Cryptographic Dossier:** Displays verification status (`VALID OFFICIAL CERTIFICATE` or `TAMPERED`), mintage number, registered collector name, official drop date, and HMAC-SHA256 protocol confirmation.
 
-#### 2. Via Linha de Comando (CLI):
+#### 2. Via Command Line Interface (CLI):
 ```bash
-npm run verify-poster "caminho/para/seu-poster.png"
+npm run verify-poster "path/to/your-poster.png"
 ```
-A ferramenta lê diretamente a estrutura binária do arquivo PNG, decodifica os chunks `tEXt` e calcula a assinatura contra a chave do servidor, informando o número da tiragem, o nome do titular e se o arquivo é autêntico ou adulterado.
+The tool directly inspects the PNG binary structure, decodes the `tEXt` chunks, and recalculates the signature against the server key, reporting the mintage edition, collector name, and whether the artwork is genuine or tampered.
 
 ---
 
-## 📬 Sistema de Notificações Diárias & Boas-Vindas (Resend API)
+## 📬 Daily Notifications & Welcome System (Resend API)
 
-O observatório integra a API transacional do **Resend** para entrega de e-mails com garantia de recebimento na **Caixa Principal (Primary Inbox)**, evitando filtros de spam e a aba de promoções:
+The observatory integrates the **Resend** transactional API to guarantee email delivery directly to the **Primary Inbox**, avoiding spam filters and promotional tabs:
 
-1. **E-mail de Boas-Vindas Imediato:** Disparado de forma assíncrona assim que o usuário realiza a inscrição no formulário. Confirma a inscrição com layout limpo e instruções sobre os drops.
-2. **Alertas Diários Automatizados (00:00:10 BRT):** Agendador cron diário que sincroniza o planeta liberado e envia um boletim com dados de letalidade, temperatura e link direto para o pôster A4 a todos os assinantes ativos.
-3. **Padrão de Entregabilidade "Tyler Vigen":** E-mails diagramados em formato pessoal e minimalista com versão paralela em texto puro (`text`), elevando a reputação de entrega perante o algoritmo do Gmail/Outlook.
-4. **Comando de Teste de E-mail (CLI):**
+1. **Immediate Welcome Email:** Dispatched asynchronously as soon as a visitor registers via the newsletter form. Confirms registration with a clean layout and instructions regarding daily drops.
+2. **Automated Daily Alerts (00:00:10 BRT):** A daily cron scheduler syncs the released exoplanet and sends a bulletin featuring lethality metrics, surface temperature, and a direct link to the A4 poster to all active subscribers.
+3. **"Tyler Vigen" High-Deliverability Design:** Emails crafted in a minimalist, personal format with an accompanying plain-text (`text`) version, elevating sender reputation across Gmail/Outlook algorithms.
+4. **Email Dispatch Test (CLI):**
 ```bash
-npm run test-email "seu-email@dominio.com"
+npm run test-email "your-email@domain.com"
 ```
 
 ---
 
 ## 🚀 Getting Started
 
-### 🌐 Instant Access (Production Live Demo)
+### 🌐 Instant Access (Live Observatory)
 You don't need to run or install anything locally to explore the project. The platform is continuously deployed and live:  
 👉 **[https://exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/)**
 
@@ -195,9 +194,8 @@ PORT=3001
 NODE_ENV=development
 SERVER_SECRET_KEY=your_secret_crypto_key_here
 DATABASE_URL=
-COMING_SOON=true
-LAUNCH_DATE=2026-09-25
-CURADORIA_SECRET=obs_k7x9m2_luckhaos
+COMING_SOON=false
+LAUNCH_DATE=2026-09-28
 ```
 *(Note: For quick local development, leave `DATABASE_URL` empty to utilize the zero-config JSON engine).*
 
@@ -206,12 +204,6 @@ CURADORIA_SECRET=obs_k7x9m2_luckhaos
 npm run dev
 ```
 Launches both the Express backend server (port `3001`) and the Vite frontend with Hot Module Replacement (port `5173`).
-
-### Weekly Curator Dashboard (Author Access)
-```bash
-npm run curadoria
-```
-Generates a secure HMAC-SHA256 session token and opens the confidential author dashboard in your default browser to inspect upcoming exoplanets, preview live A4 comic banners, and download high-resolution authenticated drops.
 
 ### Production Build & Execution
 ```bash
@@ -224,8 +216,8 @@ npm start
 ## 👨‍💻 Author & Project Links
 
 Crafted with dedication by **Lucas Gomes**  
-- 🪐 **Website Oficial do Projeto:** [https://exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/)  
-- 💻 **Portfólio Pessoal:** [https://luckhaosbb.dev](https://luckhaosbb.dev)  
+- 🪐 **Official Project Website:** [https://exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/)  
+- 💻 **Personal Portfolio:** [https://luckhaosbb.dev](https://luckhaosbb.dev)  
 - 🐙 **GitHub:** [@luckhaosbb](https://github.com/luckhaosbb)  
 - 💼 **LinkedIn:** [Lucas Gomes](https://www.linkedin.com/in/lucas-gomes-ab49582bb)
 
