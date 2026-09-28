@@ -95,7 +95,7 @@ Arte limpa, autoral e com forte identidade de graphic novel cósmica vintage (es
    - **Democratização & Posse Individualizada:** Todos os visitantes podem baixar o pôster oficial em resolução máxima (A4 300 DPI, sem marcas d'água e sem paywall). Cada download emite atômica e sequencialmente o próximo número de tiragem (`#0001`, `#0002`, `#0042`...).
    - **Registro de Titularidade Criptográfica:** O colecionador pode informar seu nome ou codinome no modal de emissão, que é assinado matematicamente pelo backend com **HMAC-SHA256**.
    - **Metadados Binários Injetados:** O token, a assinatura digital, o número do exemplar e a data do drop são gravados na estrutura binária do PNG (chunks `tEXt`), preservando a arte visual 100% limpa, pura e cinematográfica.
-   - **Auditoria de Autenticidade:** Verificação pública no terminal através do comando `npm run verify-poster <arquivo.png>`, com detecção matemática imediata de qualquer adulteração.
+   - **Auditoria de Autenticidade (Web & CLI):** Verificação instantânea tanto na interface web pública (via drag-and-drop na aba do pôster com extração client-side e consulta de Token ID) quanto no terminal via comando `npm run verify-poster <arquivo.png>`, com detecção matemática imediata de qualquer adulteração.
 7. **Download em Alta Resolução (A4 300 DPI):**
    - Proporção exata A4: Vertical (`2480 × 3508px`) ou Horizontal (`3508 × 2480px`).
 

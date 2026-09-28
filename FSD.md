@@ -74,10 +74,14 @@ O gerador intercepta o fluxo de bytes do PNG e, antes do encerramento com o chun
 Ao contrário de modelos tradicionais que estampam marcas d'água visíveis ou carimbos de série sobre a arte, o motor preserva a ilustração 100% limpa, autoral e cinematográfica. Nenhuma coordenada, código hash ou texto de série é pintado no canvas. Toda a prova matemática de procedência e posse reside com exclusividade dentro dos blocos binários oficiais do PNG.
 
 #### 4.4. Auditoria de Posse & Verificação de Autenticidade
-Qualquer pessoa em posse do arquivo pode auditá-lo:
+Qualquer pessoa em posse do arquivo ou de seu identificador pode auditá-lo:
+- **Via Interface Web (Aba Pôster):**
+  - **Drag-and-Drop Instantâneo:** O usuário solta o arquivo PNG na área de drop da página do pôster. O navegador executa a leitura direta dos bytes com `ArrayBuffer`, parseia os blocos `tEXt` em menos de 10ms (sem realizar upload do arquivo pesado) e envia apenas o payload criptográfico para `POST /api/verify-token`.
+  - **Consulta por Token ID:** Permite ao usuário colar seu código alfanumérico único para auditoria direta.
+  - **Painel Holográfico de Verificação:** Apresenta o resultado com feedback sonoro (`scanBeep` ou `hazardAlert`), certificando o exemplar oficial, titular registrado, data do drop e assinatura HMAC-SHA256 validada contra o observatório.
 - **Via Linha de Comando (CLI):** `npm run verify-poster <caminho-do-arquivo.png>`
-- **Via Endpoint HTTP:** `POST /api/verify-token` com os parâmetros do certificado.
-- Se alguém tentar alterar o nome do titular dentro dos metadados, a chave matemática SHA-256 é corrompida e o validador reprova o arquivo imediatamente com `❌ CERTIFICADO INVÁLIDO OU ADULTERADO`.
+- **Via Endpoint HTTP Direto:** `POST /api/verify-token` com os parâmetros do certificado ou `tokenId`.
+- Se alguém tentar alterar o nome do titular dentro dos metadados ou adulterar a imagem, a assinatura matemática SHA-256 é invalidada e o validador reprova o arquivo imediatamente com `❌ CERTIFICADO INVÁLIDO OU ADULTERADO`.
 
 #### 4.5. Proteção de Infraestrutura & Concorrência Atômica
 - O processamento de renderização 300 DPI consome 0% de CPU do servidor (roda inteiramente no cliente via Canvas 2D).

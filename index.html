@@ -48,7 +48,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=JetBrains+Mono:ital,wght@0,400;0,600;0,800;1,400&family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
   
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />
+  <link rel="alternate icon" href="/favicon.svg?v=2" />
+  <link rel="apple-touch-icon" href="/favicon.svg?v=2" />
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
@@ -379,6 +381,55 @@
                   ← Voltar ao Planeta
                 </button>
               </div>
+            </div>
+          </div>
+
+          <!-- Seção de Auditoria Criptográfica do Pôster -->
+          <div class="poster-verifier-section" id="posterVerifierSection">
+            <div class="verifier-header">
+              <span class="verifier-badge">🔐 PROTOCOLO DE AUTENTICIDADE CRIPTOGRÁFICA</span>
+              <h3 class="verifier-title">AUDITORIA DE AUTENTICIDADE DO PÔSTER</h3>
+              <p class="verifier-subtitle">
+                Valide o certificado criptográfico do seu exemplar colecionável. Arraste ou selecione o arquivo PNG baixado para auditar a assinatura HMAC-SHA256 gravada nos metadados binários com o Observatório.
+              </p>
+            </div>
+
+            <div class="verifier-card">
+              <!-- Dropzone Drag & Drop -->
+              <div class="verifier-dropzone" id="verifierDropzone" tabindex="0" role="button" aria-label="Arraste seu pôster PNG oficial ou clique para auditar">
+                <input type="file" id="verifierFileInput" accept=".png,image/png" style="display: none;" />
+                <div class="dropzone-content">
+                  <div class="dropzone-icon">📜</div>
+                  <div class="dropzone-prompt">
+                    <strong>Arraste seu pôster oficial (PNG) aqui</strong>
+                    <span>ou clique para selecionar o arquivo</span>
+                  </div>
+                  <div class="dropzone-note">
+                    Auditoria instantânea dos metadados <code>tEXt</code> &bull; Sem upload de arquivo pesado
+                  </div>
+                </div>
+              </div>
+
+              <!-- Alternativa: Busca por Token ID -->
+              <div class="verifier-token-alt">
+                <span class="token-alt-label">Ou valide inserindo o Token ID:</span>
+                <div class="token-alt-form">
+                  <input 
+                    type="text" 
+                    id="verifierTokenInput" 
+                    class="verifier-token-field" 
+                    placeholder="Ex: TOKEN#EXO-20260928-0001-XXXX" 
+                    spellcheck="false"
+                    autocomplete="off"
+                  />
+                  <button type="button" class="btn btn-secondary" id="verifierTokenBtn">
+                    <span>Auditar Token</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Painel de Resultados da Auditoria -->
+              <div class="verifier-result" id="verifierResult" style="display: none;"></div>
             </div>
           </div>
         </section>

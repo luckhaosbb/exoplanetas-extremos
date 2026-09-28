@@ -115,7 +115,15 @@ Diferente de sistemas que restringem o acesso ao arquivo com marcas d'água ou b
 | `Developer` | Lucas Gomes (github.com/luckhaosbb) |
 | `Timestamp` | Carimbo ISO 8601 exato de emissão |
 
-### Auditoria Criptográfica via Linha de Comando (CLI):
+### Auditoria Criptográfica de Autenticidade:
+
+#### 1. Via Interface Web (Página do Pôster)
+Diretamente no final da aba do pôster (`#poster`), o usuário conta com a seção **Auditoria de Autenticidade do Pôster**:
+- **Drag & Drop Instantâneo:** O usuário arrasta o arquivo PNG baixado para a dropzone. O navegador extrai os chunks binários `tEXt` localmente via `ArrayBuffer` (em < 10ms, sem upload de arquivos pesados para o servidor) e envia apenas o payload criptográfico para validação.
+- **Validação por Token ID:** Permite pesquisar qualquer exemplar oficial através do seu código `TOKEN#EXO-...`.
+- **Dossiê Criptográfico Holográfico:** Exibe o status da validação (`CERTIFICADO OFICIAL VÁLIDO` ou `ADULTERADO`), número da tiragem, nome do titular registrado, data oficial do drop e confirmação do protocolo HMAC-SHA256.
+
+#### 2. Via Linha de Comando (CLI):
 ```bash
 npm run verify-poster "caminho/para/seu-poster.png"
 ```

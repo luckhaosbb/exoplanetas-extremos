@@ -545,6 +545,271 @@ function setupCollectorMintModal() {
   window.openCollectorMintModal = openModal;
 }
 
+// ========================================================
+// SISTEMA DE AUDITORIA CRIPTOGRÁFICA DE PÔSTER (CLIENT-SIDE)
+// ========================================================
+function parsePngTextChunks(arrayBuffer) {
+  const bytes = new Uint8Array(arrayBuffer);
+  const pngSig = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+  for (let i = 0; i < 8; i++) {
+    if (bytes[i] !== pngSig[i]) {
+      throw new Error('O arquivo fornecido não é um arquivo PNG válido.');
+    }
+  }
+
+  const chunks = {};
+  let offset = 8;
+  const view = new DataView(arrayBuffer);
+  const decoder = new TextDecoder('utf-8');
+
+  while (offset + 8 <= bytes.length) {
+    const length = view.getUint32(offset);
+    let type = '';
+    for (let i = 0; i < 4; i++) {
+      type += String.fromCharCode(bytes[offset + 4 + i]);
+    }
+
+    const dataOffset = offset + 8;
+    const dataEnd = dataOffset + length;
+
+    if (type === 'tEXt' && dataEnd <= bytes.length) {
+      const chunkData = bytes.subarray(dataOffset, dataEnd);
+      const nullIdx = chunkData.indexOf(0x00);
+      if (nullIdx !== -1) {
+        const keyword = decoder.decode(chunkData.subarray(0, nullIdx));
+        const text = decoder.decode(chunkData.subarray(nullIdx + 1));
+        chunks[keyword] = text;
+      }
+    }
+
+    if (type === 'IEND') break;
+    offset = dataEnd + 4; // Dados + 4 bytes do CRC32
+  }
+
+  return chunks;
+}
+
+function setupPosterVerifier() {
+  const dropzone = document.getElementById('verifierDropzone');
+  const fileInput = document.getElementById('verifierFileInput');
+  const resultBox = document.getElementById('verifierResult');
+  const tokenBtn = document.getElementById('verifierTokenBtn');
+  const tokenInput = document.getElementById('verifierTokenInput');
+
+  if (!dropzone || !fileInput || !resultBox) return;
+
+  async function auditWithServer(payload) {
+    resultBox.style.display = 'block';
+    try {
+      const res = await fetch('/api/verify-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (data.valid) {
+        soundManager?.playScanBeep?.();
+        const mintLabel = data.mintLabel || (payload.mintNumber ? `EDIÇÃO #${String(payload.mintNumber).padStart(4, '0')}` : 'OFICIAL');
+        const collector = data.collectorName || payload.collectorName || 'Colecionador Oficial';
+        const planetTitle = (data.planetId || payload.planetId || 'EXOPLANETA').toUpperCase();
+        const dateDisplay = data.dateStr || payload.dateStr || '--';
+        const tokenId = data.tokenId || payload.tokenId || 'N/A';
+
+        resultBox.innerHTML = `
+          <div class="verifier-status-box valid">
+            <div class="status-badge-row">
+              <span class="status-pill-valid">✅ CERTIFICADO OFICIAL VÁLIDO</span>
+              <span class="status-date-tag">Drop: ${dateDisplay}</span>
+            </div>
+            <h4 class="verifier-planet-title">${planetTitle} &bull; ${mintLabel}</h4>
+            <p class="verifier-lead-message">${data.message || 'Exemplar autêntico e registrado com sucesso pelo Observatório.'}</p>
+            <div class="verifier-details-grid">
+              <div class="v-detail-item">
+                <span class="v-detail-label">Exemplar / Tiragem</span>
+                <span class="v-detail-val">${mintLabel}</span>
+              </div>
+              <div class="v-detail-item">
+                <span class="v-detail-label">Titular Registrado</span>
+                <span class="v-detail-val">${collector}</span>
+              </div>
+              <div class="v-detail-item">
+                <span class="v-detail-label">Token ID Oficial</span>
+                <span class="v-detail-val" style="font-family: var(--font-mono); font-size: 0.8rem;">${tokenId}</span>
+              </div>
+              <div class="v-detail-item">
+                <span class="v-detail-label">Protocolo de Integridade</span>
+                <span class="v-detail-val">HMAC-SHA256 &bull; NASA Cosmic Archive</span>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        soundManager?.playHazardAlert?.();
+        resultBox.innerHTML = `
+          <div class="verifier-status-box invalid">
+            <div class="status-badge-row">
+              <span class="status-pill-invalid">❌ CERTIFICADO INVÁLIDO OU ADULTERADO</span>
+            </div>
+            <p class="verifier-lead-message">${data.error || data.message || 'A assinatura criptográfica nos metadados não confere com o servidor.'}</p>
+            <div class="verifier-warning-hint">
+              A assinatura matemática HMAC-SHA256 calculada a partir dos dados do arquivo não é legítima. O arquivo pode ter sido forjado, adulterado ou gerado fora do motor oficial do observatório.
+            </div>
+          </div>
+        `;
+      }
+    } catch (err) {
+      console.error('Erro ao conectar ao endpoint de validação:', err);
+      resultBox.innerHTML = `
+        <div class="verifier-status-box invalid">
+          <div class="status-badge-row">
+            <span class="status-pill-invalid">⚠️ FALHA DE COMUNICAÇÃO</span>
+          </div>
+          <p class="verifier-lead-message">Não foi possível conectar ao observatório para auditar o token. Verifique sua conexão e tente novamente.</p>
+        </div>
+      `;
+    }
+  }
+
+  async function processPosterFile(file) {
+    if (!file) return;
+    resultBox.style.display = 'block';
+    resultBox.innerHTML = `
+      <div class="verifier-status-box loading">
+        <span class="spinner-dot"></span>
+        <p>Lendo metadados binários e auditando assinatura com o observatório...</p>
+      </div>
+    `;
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      let metadata;
+      try {
+        metadata = parsePngTextChunks(arrayBuffer);
+      } catch {
+        soundManager?.playHazardAlert?.();
+        resultBox.innerHTML = `
+          <div class="verifier-status-box invalid">
+            <div class="status-badge-row">
+              <span class="status-pill-invalid">❌ FORMATO NÃO SUPORTADO</span>
+            </div>
+            <p class="verifier-lead-message">O arquivo selecionado não é uma imagem PNG válida.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (!metadata || Object.keys(metadata).length === 0 || !metadata.HMAC_Signature) {
+        soundManager?.playHazardAlert?.();
+        resultBox.innerHTML = `
+          <div class="verifier-status-box warning">
+            <div class="status-badge-row">
+              <span class="status-pill-warning">⚠️ SEM METADADOS CRIPTOGRÁFICOS</span>
+            </div>
+            <p class="verifier-lead-message">Nenhum metadado oficial (chunks tEXt) ou assinatura criptográfica foi encontrado neste arquivo.</p>
+            <div class="verifier-warning-hint">
+              Certifique-se de que este é o arquivo PNG original baixado da nossa plataforma. Aplicativos de mensagens (como WhatsApp ou Discord) e editores de imagem costumam remover metadados ao recomprimir imagens.
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      let targetDate = metadata.Drop_Date;
+      const tokenDateMatch = (metadata.NFT_Token_ID || '').match(/TOKEN#EXO-(\d{4})(\d{2})(\d{2})-/i);
+      if (tokenDateMatch) {
+        targetDate = `${tokenDateMatch[1]}-${tokenDateMatch[2]}-${tokenDateMatch[3]}`;
+      }
+
+      const mintNumFromToken = (metadata.NFT_Token_ID || '').match(/TOKEN#EXO-\d{8}-(\d{4})-/i);
+      const mintNumber = metadata.Mint_Number 
+        ? parseInt(metadata.Mint_Number.replace(/\D/g, ''), 10) 
+        : (mintNumFromToken ? parseInt(mintNumFromToken[1], 10) : null);
+
+      const collectorName = metadata.Collector_Name || 'Colecionador Oficial';
+
+      await auditWithServer({
+        planetId: metadata.Exoplanet_ID,
+        dateStr: targetDate,
+        mintNumber,
+        collectorName,
+        serial: metadata.Serial_Entropy,
+        signature: metadata.HMAC_Signature,
+        tokenId: metadata.NFT_Token_ID
+      });
+
+    } catch (err) {
+      console.error('Erro na auditoria do pôster:', err);
+      resultBox.innerHTML = `
+        <div class="verifier-status-box invalid">
+          <div class="status-badge-row">
+            <span class="status-pill-invalid">❌ ERRO NA LEITURA</span>
+          </div>
+          <p class="verifier-lead-message">Falha inesperada ao ler a estrutura binária do arquivo.</p>
+        </div>
+      `;
+    }
+  }
+
+  // Eventos de clique e Drag & Drop
+  dropzone.addEventListener('click', () => fileInput.click());
+  dropzone.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      fileInput.click();
+    }
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files[0]) {
+      processPosterFile(e.target.files[0]);
+    }
+  });
+
+  dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.classList.add('dragover');
+  });
+
+  dropzone.addEventListener('dragleave', () => {
+    dropzone.classList.remove('dragover');
+  });
+
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('dragover');
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+      processPosterFile(e.dataTransfer.files[0]);
+    }
+  });
+
+  // Validação manual por Token ID
+  if (tokenBtn && tokenInput) {
+    tokenBtn.addEventListener('click', async () => {
+      const raw = tokenInput.value.trim();
+      if (!raw) return;
+
+      resultBox.style.display = 'block';
+      resultBox.innerHTML = `
+        <div class="verifier-status-box loading">
+          <span class="spinner-dot"></span>
+          <p>Consultando Token ID no registro oficial do observatório...</p>
+        </div>
+      `;
+
+      await auditWithServer({ tokenId: raw });
+    });
+
+    tokenInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        tokenBtn.click();
+      }
+    });
+  }
+}
+
 // Survival Simulator Action
 function simulateSurvival() {
   soundManager.playHazardAlert();
@@ -957,6 +1222,7 @@ function bindEvents() {
   }
 
   setupCollectorMintModal();
+  setupPosterVerifier();
   setupSubscribeForm();
   setupAuthModal();
   setupTabNavigation();

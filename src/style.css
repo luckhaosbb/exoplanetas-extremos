@@ -1121,6 +1121,308 @@ body {
   margin-top: 1.25rem;
 }
 
+/* ========================================== */
+/* SEÇÃO DE AUDITORIA CRIPTOGRÁFICA DO PÔSTER */
+/* ========================================== */
+.poster-verifier-section {
+  margin-top: 3.5rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.verifier-header {
+  text-align: center;
+  max-width: 720px;
+  margin-bottom: 1.75rem;
+}
+
+.verifier-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: var(--accent-primary);
+  margin-bottom: 0.75rem;
+}
+
+.verifier-title {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  letter-spacing: 0.04em;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.verifier-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.verifier-card {
+  width: 100%;
+  max-width: 680px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+}
+
+.verifier-dropzone {
+  border: 2px dashed rgba(56, 189, 248, 0.35);
+  border-radius: var(--radius-md);
+  padding: 2.25rem 1.5rem;
+  text-align: center;
+  background: rgba(56, 189, 248, 0.02);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.verifier-dropzone:hover,
+.verifier-dropzone:focus,
+.verifier-dropzone.dragover {
+  border-color: var(--accent-primary);
+  background: rgba(56, 189, 248, 0.08);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
+}
+
+.dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dropzone-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.dropzone-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.98rem;
+  color: var(--text-main);
+}
+
+.dropzone-prompt span {
+  font-size: 0.84rem;
+  color: var(--text-dim);
+}
+
+.dropzone-note {
+  margin-top: 0.75rem;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+.dropzone-note code {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.12rem 0.35rem;
+  border-radius: 4px;
+  color: var(--accent-primary);
+}
+
+.verifier-token-alt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.token-alt-label {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.token-alt-form {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.verifier-token-field {
+  flex: 1;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-main);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.verifier-token-field:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+.verifier-result {
+  animation: fadeIn 0.25s ease-out;
+}
+
+.verifier-status-box {
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.verifier-status-box.loading {
+  border: 1px solid var(--border-glow);
+  background: rgba(56, 189, 248, 0.04);
+  align-items: center;
+  text-align: center;
+  font-family: var(--font-mono);
+  color: var(--accent-primary);
+}
+
+.verifier-status-box.valid {
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.06);
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.12);
+}
+
+.verifier-status-box.invalid {
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.06);
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.12);
+}
+
+.verifier-status-box.warning {
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.06);
+  box-shadow: 0 0 25px rgba(245, 158, 11, 0.1);
+}
+
+.status-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.status-pill-valid {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+}
+
+.status-pill-invalid {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+}
+
+.status-pill-warning {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+}
+
+.status-date-tag {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.verifier-planet-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--text-main);
+  margin-top: 0.25rem;
+}
+
+.verifier-lead-message {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.verifier-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 600px) {
+  .verifier-details-grid {
+    grid-template-columns: 1fr;
+  }
+  .token-alt-form {
+    flex-direction: column;
+  }
+}
+
+.v-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.v-detail-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.v-detail-val {
+  font-size: 0.85rem;
+  color: var(--text-main);
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.verifier-warning-hint {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.25);
+  border-left: 3px solid var(--accent-amber);
+  padding: 0.65rem 0.85rem;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  line-height: 1.5;
+}
+
 /* Subscribe Section (Inspirado no estilo Tyler Vigen) */
 .subscribe-section {
   display: flex;
