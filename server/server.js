@@ -28,6 +28,15 @@ app.use((req, res, next) => {
 });
 
 app.use(cors());
+
+// Normalização de barras duplicadas na URL (evita 404 caso serviços de monitoramento ou clientes enviem //api/...)
+app.use((req, res, next) => {
+  if (req.url && req.url.includes('//')) {
+    req.url = req.url.replace(/\/{2,}/g, '/');
+  }
+  next();
+});
+
 app.use(express.json({ limit: '20mb' }));
 
 // Rate Limiter em memória para Inscrição na Newsletter (mitigação de flood/spam)
