@@ -1,143 +1,136 @@
-# 🛰️ ARQUITETURA DO PIPELINE DE IA & AUTOMAÇÃO SEMANAL (CASCADE FALLBACK CHAIN)
+# 🛰️ AI PIPELINE ARCHITECTURE & WEEKLY AUTOMATION (CASCADE FALLBACK CHAIN)
 
-> **Documento Oficial de Engenharia de Software e Segurança**  
-> **Projeto:** Exoplanetas Extremos (Daily Exoplanets)  
-> **Website Oficial em Produção:** **[https://exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/)**  
-> **Autor/Curador:** Lucas Gomes (github.com/luckhaosbb)  
-> **Padrão Arquitetural:** Circuit Breaker / Cascade Fallback Chain (Alta Disponibilidade)
+> **Official Software Engineering & Security Document**  
+> **Project:** Extreme Exoplanets (Daily Exoplanets)  
+> **Official Live Website:** **[https://exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/)**  
+> **Author/Curator:** Lucas Gomes (github.com/luckhaosbb)  
+> **Architectural Pattern:** Circuit Breaker / Cascade Fallback Chain (High Availability)
 
 ---
 
-## 1. Visão Geral da Arquitetura
+## 1. Architectural Overview
 
-O sistema opera em **Ciclos Cósmicos Semanais Fechados** (Segunda-feira a Domingo). O objetivo é garantir **automação autônoma total**: o servidor trabalha sozinho de madrugada e o autor/curador apenas audita os resultados pelo Painel de Curadoria no sábado pela manhã.
+The system operates in **Closed Weekly Cosmic Cycles** (Monday through Sunday). The core objective is **full autonomous automation**: the server operates unattended overnight, while the author/curator audits generation results through the Curator Deck on Saturday morning.
 
 ```mermaid
 flowchart TD
-    A["Sábado 00:00:00 (Cron Job)"] --> B["1. Trava a Próxima Semana no Banco (Seg a Dom)"]
-    B --> C["2. Inicia Fila Sequencial de Geração (aiImageService)"]
-    C --> D{"TIER 1: SiliconFlow (768x1024)"}
-    D -- "Sucesso" --> J["Grava em /assets/planets/"]
-    D -- "Falha / Sem Saldo" --> E{"TIER 2: Together AI (768x1024)"}
-    E -- "Sucesso" --> J
-    E -- "Falha / Sem Chave" --> F{"TIER 3: Cloudflare Workers AI"}
-    F -- "Habilitado & Sucesso" --> J
-    F -- "Desativado / Falha" --> G{"TIER 4: Google AI Studio (Padrão Ouro)"}
-    G -- "Sucesso" --> J
-    J --> K["Sábado de Manhã: Curador executa 'npm run curadoria'"]
-    K --> L{"Arte Aprovada?"}
-    L -- Sim --> M["Semana roda 100% no piloto automático"]
-    L -- Não (Ajuste via Gemini Web) --> P["Clica em 'Copiar Prompt' -> Gera no Gemini Pro -> Arrasta para o Painel"]
+    A["Saturday 00:00:00 (Cron Job)"] --> B["1. Lock Next Week Schedule in DB (Mon to Sun)"]
+    B --> C["2. Launch Sequential Generation Queue (aiImageService)"]
+    C --> D{"TIER 1: Together AI (FLUX.1.1-pro 768x1024)"}
+    D -- "Success" --> J["Persist to /assets/planets/"]
+    D -- "Failure / Exhausted" --> E{"TIER 2: Cloudflare Workers AI"}
+    E -- "Enabled & Success" --> J
+    E -- "Disabled / Failure" --> F{"TIER 3: Google AI Studio (Gold Standard)"}
+    F -- "Success" --> J
+    J --> K["Saturday Morning: Curator Audits drops"]
+    K --> L{"Artwork Approved?"}
+    L -- Yes --> M["Week runs 100% on autopilot"]
+    L -- "No (Refine via Gemini Web)" --> P["Click 'Copy Prompt' -> Generate on Gemini Pro -> Drop into Deck"]
     P --> M
-    L -- Não (Ajuste via API) --> N["Clica em 'Regenerar Arte (API Automatizada)'"]
+    L -- "No (Regenerate via API)" --> N["Click 'Regenerate Artwork (Automated API)'"]
     N --> M
 ```
 
 ---
 
-## 2. A Cascata de Resiliência Consolidada (4 Camadas de Alta Disponibilidade)
+## 2. Consolidated Resilience Cascade (High Availability Layers)
 
-O motor [`server/services/aiImageService.js`](file:///C:/Users/Lucas/Downloads/Daily%20Exoplanets/server/services/aiImageService.js) opera com arquitetura multi-rota de alta fidelidade:
+The generation engine in [`server/services/aiImageService.js`](server/services/aiImageService.js) implements a high-fidelity multi-tier cascade architecture:
 
-| Rota | Provedor / Motor | Modelo | Status Atual | Diagnóstico / Observações |
+| Tier | Provider / Engine | Model | Current Status | Diagnostics / Notes |
 | :---: | :---: | :---: | :---: | :---: |
-| **Rota 1** | **SiliconFlow** | `FLUX.1-schnell` | 🟡 Chave requer renovação | Resolução nativa vertical `768x1024`. A chave retornou 402 (saldo $0.00). Requer saldo ativo. |
-| **Rota 2** | **Together AI** | `FLUX.1-schnell` | 🟢 **$5.00 Dólares Gratuitos** | Resolução nativa vertical `768x1024` e horizontal `1024x768`. Provedor oficial de GPU de alta velocidade com bônus inicial no cadastro. |
-| **Rota 3** | **Cloudflare Workers AI** | `FLUX.1-schnell` | ⚪ **Desativada pelo Curador** | Código preservado (`CLOUDFLARE_ENABLED=false`). Credenciais válidas, mas mantida desligada por gerar apenas 1:1 e estilo simplificado. |
-| **Rota 4** | **Google Cloud / AI Studio** | `Imagen 3 / Gemini Image` | 🟢 **Padrão Ouro da Coleção** | O motor de referência que produziu a qualidade impecável dos pôsteres #001 a #005 (proporção A4 vertical e horizontal nativa, nanquim e tipografia 3D). |
+| **Route 1 (Primary)** | **Together AI** | `black-forest-labs/FLUX.1.1-pro` | 🟢 **Active Primary Route** | Native vertical `768x1024` and horizontal `1024x768`. Ultra-fast GPU cluster with high-fidelity output. Initial $5.00 credit on onboarding. |
+| **Route 2 (Fallback)** | **Cloudflare Workers AI** | `@cf/black-forest-labs/flux-1-schnell` | ⚪ **Configurable Standby** | Global Edge network with 10,000 free Neurons/day (`CLOUDFLARE_ENABLED=true`). Generates 1:1 canvas with safe-zone cropping. |
+| **Manual / Gold Standard** | **Google Cloud / AI Studio** | `imagen-3.0-generate-002` / `Gemini Pro` | 🟢 **Master Collection Standard** | Benchmark engine responsible for the museum-grade quality of Issues #001 to #005 (native A4 2:3/3:2 aspect ratios, dynamic ink linework, and 3D typography). |
 
-> **Nota de Decomissionamento de Rotas Antigas:**  
-> * **Hugging Face (`HF_TOKEN`):** Removida totalmente do código e das variáveis de ambiente após a Hugging Face descontinuar a infraestrutura de inferência serverless gratuita de imagens (HTTP 410).  
-> * **Pollinations.ai:** Removida totalmente a pedido do curador por gerar composições cósmicas abstratas com marca d'água e incompatíveis com a estética pulp Jack Kirby de 1970.
-
----
-
-## 3. Rotina Semanal do Curador (Fluxo Híbrido: Automação + Gemini Pro Web)
-
-Com as melhorias no Observatório, você possui **duas formas complementares de operar**:
-
-### Modo A: 100% Piloto Automático (Todo Sábado)
-1. O cron job do servidor aciona a cascata aos sábados à meia-noite e gera todas as 7 artes.
-2. Você roda `npm run curadoria` no sábado pela manhã apenas para auditar.
-
-### Modo B: Curadoria com sua Assinatura Google AI Pro / Gemini Web (Custo Zero)
-1. Abra o painel com `npm run curadoria`.
-2. Clique no planeta desejado na grade dos 7 dias.
-3. Clique no botão **"📋 Copiar Prompt Mestre (Gemini Pro)"**. O prompt oficial daquele exoplaneta é copiado para sua área de transferência.
-4. Abra o [Gemini Advanced Web](https://gemini.google.com/) com seu plano de estudante, cole o prompt e envie.
-5. Quando o Gemini gerar a arte no estilo Jack Kirby, baixe a imagem e **arraste o arquivo diretamente para o quadro do pôster** no painel (ou clique em **"📤 Enviar Arte do Gemini"**).
-6. O sistema grava o arquivo instantaneamente em `/server/assets/planets/` e `/public/assets/planets/`, renderiza os selos oficiais da NASA e marca a Issue como pronta!
+### Decommissioned & Legacy Routes:
+- **SiliconFlow (`SILICONFLOW_API_KEY`):** Deprecated and demoted from the active cascade. SiliconCloud requires an active paid recharge (unfunded accounts return HTTP 402 with $0.00 balance).
+- **Hugging Face (`HF_TOKEN`):** Completely removed from source code and environment variables following Hugging Face's discontinuation of serverless free image inference (HTTP 410 Gone).
+- **Pollinations.ai:** Removed due to abstract generation artifacts, watermarking, and stylistic divergence from the 1970s Jack Kirby retro pulp aesthetic.
 
 ---
 
-## 4. Matriz de Prompts Especializados por Provedor de IA (Arquitetura Multi-Rota)
+## 3. Curator Weekly Routine (Hybrid Workflow: Autopilot + Gemini Pro Web)
 
-Cada provedor possui características distintas de proporção de tela (*aspect ratio*) e interpretação de tokens (*text encoder*). Para evitar que ajustes em um modelo degradem o outro, o arquivo [`server/data/prompts.js`](file:///C:/Users/Lucas/Downloads/Daily%20Exoplanets/server/data/prompts.js) implementa **construtores de prompt especializados e isolados para cada rota**:
+The platform provides **two complementary operating modes**:
 
-### 🎯 4.1. Rota Gemini 3.1 Flash / Google Imagen (Padrão Mestre das Issues #001 a #005)
-* **Proporção Nativa:** `2:3` (Vertical) e `3:2` (Horizontal).
-* **Características:** Prosa cinematográfica rica em inglês, Jack Kirby cosmic energy krackle, CMYK halftone dots, 100% Full-bleed sangria total, tipografia 3D extrusada integrada ao topo.
-* **Status:** **Intocado e preservado** para garantir consistência estética absoluta com as obras-primas já homologadas.
+### Mode A: 100% Autopilot (Every Saturday Midnight)
+1. The backend cron scheduler activates the cascade on Saturday at 00:00:00 BRT and synthesizes all 7 artworks autonomously.
+2. The curator inspects and audits the queue on Saturday morning.
 
-### ⚡ 4.2. Rota Cloudflare Workers AI (`FLUX.1-schnell`)
-* **Proporção Nativa:** `1:1` fixo (`1024x1024`).
-* **Diagnóstico de Engenharia:** Ao enquadrar uma imagem quadrada (1:1) dentro de um pôster vertical A4 (2:3), o canvas faz um zoom de compensação (*cover*), descartando 300px nas laterais esquerda e direita. Se o letreiramento for largo, o texto é cortado.
-* **Estratégia de Prompt (Safe Zone Central 50%):**
-  * O prompt da Cloudflare instrui explicitamente a IA a concentrar a tipografia e o planeta na **coluna central de 50% de largura**, deixando as margens laterais repletas de espaço estrelado vazio para sangria de corte.
-  * Letreiramento compacto, alto e estreito (*condensed title lettering*).
-
-### 🇨🇳 4.3. Rota SiliconFlow (`FLUX.1-schnell`)
-* **Proporção Nativa:** `768x1024` (Vertical) e `1024x768` (Horizontal).
-* **Características:** Aproveita a resolução nativa da API sem necessidade de cortes no canvas.
-* **Formato:** Otimizado para o encoder T5-XXL do FLUX com descrições objetivas de física e iluminação cósmica.
+### Mode B: Zero-Cost Curation with Google AI Pro / Gemini Advanced Web
+1. Open the confidential Curator Deck.
+2. Select any exoplanet in the 7-day schedule grid.
+3. Click **"Copy Master Prompt (Gemini Pro)"** to copy the validated prompt to your clipboard.
+4. Open [Gemini Advanced Web](https://gemini.google.com/), paste the prompt, and execute generation.
+5. Download the resulting Jack Kirby style artwork and drag the file directly onto the poster viewport in the curation module.
+6. The server immediately stores the master file into `/server/assets/planets/` and `/public/assets/planets/`, renders official NASA badges, and marks the Issue as ready.
 
 ---
 
-## 5. Práticas de Segurança e Hardening (OWASP / Sênior)
+## 4. Specialized Prompt Matrix by AI Provider (Multi-Route Architecture)
 
-1. **Proteção contra Path Traversal (CWE-22):**
-   * Todo identificador `planetId` que interage com o sistema de arquivos é rigidamente validado pela expressão regular: `/^[a-zA-Z0-9_-]{2,64}$/`. Tentativas de injeção de caminho (`../`) são descartadas com erro HTTP 400.
-2. **Proteção contra Vazamento de Credenciais (CWE-200):**
-   * Tokens como `SILICONFLOW_API_KEY`, `CLOUDFLARE_API_TOKEN`, `HF_TOKEN`, `GOOGLE_GENAI_API_KEY` e `SERVER_SECRET_KEY` residem exclusivamente no servidor (`server/config/index.js`) e nunca são enviados para o front-end.
-3. **Autenticação Criptográfica HMAC-SHA256:**
-   * O endpoint `/api/curadoria` e todas as rotas administrativas exigem token assinado com validade de 24 horas (`requireCuratorAuth`).
-4. **Resiliência do Banco de Dados:**
-   * O sistema opera com **Arquitetura Híbrida**: se o PostgreSQL estiver ativo (`DATABASE_URL`), ele persiste com transações SQL seguras; se o PostgreSQL estiver indisponível ou em desenvolvimento local, o sistema ativa automaticamente o fallback persistente em JSON sem quebrar a aplicação.
-5. **Timeouts e Circuit Breaker:**
-   * Chamadas externas a provedores de IA possuem retry limitado e fallback instantâneo em caso de erro, prevenindo bloqueio do event-loop do Node.js.
+Each provider exhibits distinct aspect-ratio requirements and text-encoder idiosyncrasies. To prevent alterations on one model from degrading another, [`server/data/prompts.js`](server/data/prompts.js) implements **dedicated, isolated prompt builders per engine**:
+
+### 🎯 4.1. Google Imagen 3 / Gemini (Issues #001 through #005 Gold Standard)
+- **Native Aspect Ratio:** `2:3` (Vertical) and `3:2` (Horizontal).
+- **Key Characteristics:** Rich cinematic English prose, Jack Kirby cosmic energy krackle dots, CMYK four-color halftone screens, 100% Full-bleed borderless composition, integrated extruded 3D typography.
+- **Status:** Pristine and locked to maintain aesthetic uniformity with catalog masterpieces.
+
+### ⚡ 4.2. Together AI (`FLUX.1.1-pro` / `FLUX.1-schnell`)
+- **Native Resolutions:** `768x1024` (Vertical) and `1024x768` (Horizontal).
+- **Key Characteristics:** Native vertical canvas without post-generation cropping. Optimized for Flux's T5-XXL text encoder with precise lighting, color palettes, and celestial physics descriptors.
+
+### 🌐 4.3. Cloudflare Workers AI (`FLUX.1-schnell`)
+- **Native Resolution:** Fixed `1:1` (`1024x1024`).
+- **Engineering Accommodation:** Fitting a square (1:1) image into an A4 vertical canvas requires dynamic zoom/crop, removing 300px from left and right margins.
+- **50% Central Safe Zone Strategy:** The Cloudflare prompt explicitly forces typography and planetary bodies into the central 50% width column, keeping outer margins as bleed-safe starry void.
 
 ---
 
-## 6. Como Ativar o Cloudflare Workers AI Gratuito (Passo a Passo)
+## 5. Security & Hardening Best Practices (OWASP / Enterprise Grade)
 
-A Cloudflare oferece **10.000 Neurons gratuitos por dia** para todos os usuários cadastrados (sem necessidade de plano pago):
+1. **Path Traversal Defense (CWE-22):**
+   - Every `planetId` interacting with the filesystem is strictly validated against: `/^[a-zA-Z0-9_-]{2,64}$/`. Path manipulation attempts (`../`) are immediately rejected with HTTP 400.
+2. **Credential Leakage Prevention (CWE-200):**
+   - API keys (`TOGETHER_API_KEY`, `CLOUDFLARE_API_TOKEN`, `GOOGLE_GENAI_API_KEY`, `SERVER_SECRET_KEY`) reside exclusively server-side in `server/config/index.js` and are never serialized to the frontend client.
+3. **HMAC-SHA256 Cryptographic Authentication:**
+   - Administrative and curation endpoints require signed session tokens validated via `requireCuratorAuth`.
+4. **Database Resilience & Zero-Config Fallback:**
+   - Hybrid persistence: Cloud PostgreSQL transactions when `DATABASE_URL` is set; seamless fallback to transactional JSON storage for local offline development.
+5. **Circuit Breakers & Timeouts:**
+   - External provider requests enforce short timeouts and bounded retry limits to prevent Node.js event-loop exhaustion.
 
-1. **Criar Conta Gratuita:** Acesse [dash.cloudflare.com/sign-up](https://dash.cloudflare.com/sign-up).
-2. **Copiar Account ID:** Na barra lateral ou URL do painel, copie o seu `Account ID` (string alfanumérica de 32 caracteres).
-3. **Criar API Token:**
-   * Vá em **My Profile** > **API Tokens** > **Create Token**.
-   * Use o template **"Workers AI"** ou crie um Custom Token com permissão: `Account > Workers AI > Read & Edit`.
-   * Copie o token gerado.
-4. **Salvar no `.env`:**
+---
+
+## 6. How to Enable Cloudflare Workers AI (Optional Standby)
+
+Cloudflare provides **10,000 free Neurons per day** on free-tier accounts:
+
+1. **Create Free Account:** Sign up at [dash.cloudflare.com/sign-up](https://dash.cloudflare.com/sign-up).
+2. **Retrieve Account ID:** Copy your 32-character hexadecimal `Account ID` from the dashboard URL or sidebar.
+3. **Generate API Token:**
+   - Navigate to **My Profile** > **API Tokens** > **Create Token**.
+   - Use the **Workers AI** template or create a custom token with permission: `Account > Workers AI > Read & Edit`.
+4. **Set Environment Variables:**
    ```env
-   CLOUDFLARE_ACCOUNT_ID=seu_account_id_aqui
-   CLOUDFLARE_API_TOKEN=seu_token_aqui
+   CLOUDFLARE_ENABLED=true
+   CLOUDFLARE_ACCOUNT_ID=your_account_id_here
+   CLOUDFLARE_API_TOKEN=your_token_here
    ```
-O backend detectará automaticamente as chaves e priorizará o Cloudflare Workers AI na Rota 2.
 
 ---
 
-## 7. Runbook Operacional de Verificação e Testes
+## 7. Operational Verification Runbook
 
-Para validar a integridade de todo o pipeline sem esperar a meia-noite de sábado, o desenvolvedor dispõe dos seguintes comandos:
+To test pipeline integrity without waiting for the scheduled Saturday midnight cron execution:
 
-| Ação | Comando / Procedimento |
+| Action | Command / Procedure |
 | :--- | :--- |
-| **Auditoria Semanal** | `npm run curadoria` (Abre navegador com token seguro) |
-| **Disparo Manual do Ciclo** | Clicar em *"⚡ Executar Ciclo da Próxima Semana"* na tela de curadoria |
-| **Regeneração Individual** | Clicar em *"🔄 Regenerar Arte"* no card do planeta selecionado |
-| **Teste de Build Frontend** | `npm run build` (Valida empacotamento estático do Vite) |
-| **Ambiente de Produção (Online)** | [https://exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/) |
-| **Healthcheck da API (Produção)** | `curl https://exoplanets.luckhaosbb.dev/api/health` |
-| **Verificação de Healthcheck (Local)** | `curl http://localhost:3001/api/planet-of-the-day` |
-
+| **Weekly Queue Audit** | Open Curator Deck via secure launcher |
+| **Manual Batch Cycle** | Trigger *"⚡ Execute Next Week Cycle"* in the curator interface |
+| **Individual Regeneration** | Trigger *"🔄 Regenerate Artwork"* on any selected planet card |
+| **Frontend Production Build** | `npm run build` (Validates Vite static bundling) |
+| **Live Observatory Web** | [https://exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/) |
+| **Production API Health Check** | `curl https://exoplanets.luckhaosbb.dev/api/health` |
+| **Local API Health Check** | `curl http://localhost:3001/api/planet-of-the-day` |
