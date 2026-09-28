@@ -163,10 +163,7 @@ npm install
 ```
 
 ### Environment Configuration
-Create a `.env` file from the provided template:
-```bash
-cp .env.example .env
-```
+Create a `.env` file in the root directory:
 
 Available configuration keys:
 ```env

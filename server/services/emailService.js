@@ -37,7 +37,7 @@ export const emailService = {
       return { success: false, error: 'Chave RESEND_API_KEY não configurada no servidor.' };
     }
 
-    const fromAddress = config.emailFrom || 'Exoplanetas Extremos <onboarding@resend.dev>';
+    const fromAddress = config.emailFrom || 'Lucas Gomes • Exoplanetas Extremos <alertas@luckhaosbb.dev>';
     const appUrl = config.appBaseUrl || 'https://exoplanets.luckhaosbb.dev';
 
     const subject = '🪐 Inscrição Confirmada • Bem-vindo ao Observatório de Exoplanetas Extremos';
@@ -178,7 +178,7 @@ Caso deseje cancelar sua inscrição a qualquer momento, basta responder diretam
       return { totalSent: 0, failed: subscribers.length };
     }
 
-    const fromAddress = config.emailFrom || 'Exoplanetas Extremos <onboarding@resend.dev>';
+    const fromAddress = config.emailFrom || 'Lucas Gomes • Exoplanetas Extremos <alertas@luckhaosbb.dev>';
     const appUrl = config.appBaseUrl || 'https://exoplanets.luckhaosbb.dev';
 
     const planetName = planet.name || 'Exoplaneta Extremo';

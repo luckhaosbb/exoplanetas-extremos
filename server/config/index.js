@@ -48,7 +48,7 @@ export const config = {
 
   // Provedor Transacional de E-mails (Resend)
   resendApiKey: process.env.RESEND_API_KEY || null,
-  emailFrom: process.env.EMAIL_FROM || 'Exoplanetas Extremos <onboarding@resend.dev>',
+  emailFrom: process.env.EMAIL_FROM || 'Lucas Gomes • Exoplanetas Extremos <alertas@luckhaosbb.dev>',
   appBaseUrl: process.env.APP_BASE_URL || 'https://exoplanets.luckhaosbb.dev'
 };
 
