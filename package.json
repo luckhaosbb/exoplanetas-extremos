@@ -11,7 +11,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "curadoria": "node scripts/curadoria.js",
-    "verify-poster": "node scripts/verifyPoster.js"
+    "verify-poster": "node scripts/verifyPoster.js",
+    "test-email": "node scripts/testEmail.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -19,6 +20,7 @@
     "express": "^4.21.2",
     "node-cron": "^4.6.0",
     "pg": "^8.13.1",
+    "resend": "^6.30.0",
     "vite": "^8.3.0"
   },
   "devDependencies": {

@@ -1,4 +1,5 @@
 import { subscriberRepository } from '../repositories/subscriberRepository.js';
+import { emailService } from './emailService.js';
 
 /**
  * Service de Domínio para gerenciamento de assinaturas da newsletter.
@@ -35,6 +36,13 @@ export const subscriberService = {
     }
 
     const result = await subscriberRepository.save(email);
+
+    // Se é uma nova inscrição e o serviço de e-mail estiver ativo, dispara o e-mail de boas-vindas
+    if (!result.alreadySubscribed) {
+      emailService.sendWelcomeEmail(email).catch(err => {
+        console.error(`⚠️ [SUBSCRIBER SERVICE] Falha no disparo assíncrono do e-mail de boas-vindas para ${email}:`, err.message);
+      });
+    }
 
     return {
       success: true,

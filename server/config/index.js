@@ -44,6 +44,11 @@ export const config = {
   cloudflareApiToken: process.env.CLOUDFLARE_API_TOKEN || null,
   // ROTA MANUAL: Google Gemini Pro Web (Padrão Ouro das Issues #001 a #005 via Curadoria)
   googleGenAiApiKey: process.env.GOOGLE_GENAI_API_KEY || process.env.GEMINI_API_KEY || null,
-  aiImageModel: process.env.AI_IMAGE_MODEL || 'imagen-3.0-generate-002'
+  aiImageModel: process.env.AI_IMAGE_MODEL || 'imagen-3.0-generate-002',
+
+  // Provedor Transacional de E-mails (Resend)
+  resendApiKey: process.env.RESEND_API_KEY || null,
+  emailFrom: process.env.EMAIL_FROM || 'Exoplanetas Extremos <onboarding@resend.dev>',
+  appBaseUrl: process.env.APP_BASE_URL || 'https://exoplanets.luckhaosbb.dev'
 };
 

@@ -82,5 +82,19 @@ export const subscriberRepository = {
     }
 
     return readSubscribers().length;
+  },
+
+  async getAll() {
+    if (isPostgres()) {
+      try {
+        const pool = getPool();
+        const res = await pool.query('SELECT * FROM subscribers ORDER BY created_at ASC');
+        return res.rows;
+      } catch (err) {
+        console.error('Erro ao consultar todos os assinantes no PostgreSQL:', err.message);
+      }
+    }
+
+    return readSubscribers();
   }
 };

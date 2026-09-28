@@ -1,18 +1,20 @@
 import cron from 'node-cron';
 import { planetService } from './planetService.js';
+import { subscriberRepository } from '../repositories/subscriberRepository.js';
+import { emailService } from './emailService.js';
 
 let weeklyTask = null;
+let dailyDropTask = null;
 
 export const cronService = {
   /**
    * Inicializa os agendadores em background do sistema
    */
   startCronJobs() {
-    // Agenda para rodar todo SÁBADO às 00:00:00 no Horário Oficial de Brasília (UTC-3)
-    // Sintaxe cron: segundo minuto hora dia-do-mês mês dia-da-semana (0-6, onde 6 = Sábado)
-    const scheduleExpr = '0 0 * * 6';
+    // 1. Ciclo Semanal: Roda todo SÁBADO às 00:00:00 no Horário de Brasília (UTC-3)
+    const scheduleWeeklyExpr = '0 0 * * 6';
 
-    weeklyTask = cron.schedule(scheduleExpr, async () => {
+    weeklyTask = cron.schedule(scheduleWeeklyExpr, async () => {
       console.log('\n⏰ [CRON SERVICE] Disparo do ciclo semanal de SÁBADO (00:00 BRT)!');
       try {
         const result = await planetService.runWeeklyCurationCycle();
@@ -24,7 +26,31 @@ export const cronService = {
       timezone: 'America/Sao_Paulo'
     });
 
-    console.log('⏰ [CRON SERVICE] Agendador ativo: Execução programada para todo SÁBADO às 00:00 (Horário de Brasília).');
+    // 2. Alerta Diário: Roda TODOS OS DIAS às 00:00:10 no Horário de Brasília (10s após a virada do drop)
+    const scheduleDailyExpr = '10 0 * * *';
+
+    dailyDropTask = cron.schedule(scheduleDailyExpr, async () => {
+      console.log('\n⏰ [CRON SERVICE] Disparo do alerta diário de novo drop para assinantes (00:00:10 BRT)!');
+      try {
+        const todayData = await planetService.getTodayPlanet();
+        if (todayData?.planet) {
+          const subscribers = await subscriberRepository.getAll();
+          if (subscribers && subscribers.length > 0) {
+            if (emailService.isConfigured()) {
+              await emailService.sendDailyDropAlert(subscribers, todayData.planet);
+            } else {
+              console.log(`ℹ️ [CRON SERVICE] ${subscribers.length} assinante(s) na fila, mas RESEND_API_KEY ainda não configurada no .env.`);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('❌ [CRON SERVICE] Erro ao disparar alerta diário aos inscritos:', err);
+      }
+    }, {
+      timezone: 'America/Sao_Paulo'
+    });
+
+    console.log('⏰ [CRON SERVICE] Agendadores ativos: Ciclo semanal aos sábados (00:00) e Alertas diários aos inscritos (00:00 BRT).');
   },
 
   /**
@@ -33,7 +59,10 @@ export const cronService = {
   stopCronJobs() {
     if (weeklyTask) {
       weeklyTask.stop();
-      console.log('🛑 [CRON SERVICE] Agendadores cron finalizados.');
     }
+    if (dailyDropTask) {
+      dailyDropTask.stop();
+    }
+    console.log('🛑 [CRON SERVICE] Agendadores cron finalizados.');
   }
 };

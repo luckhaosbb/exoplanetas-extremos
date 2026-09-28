@@ -53,8 +53,9 @@ Daily Exoplanets/
 │   ├── services/                # Business Logic Layer
 │   │   ├── aiImageService.js    # 5-tier Cascade Fallback Chain AI generation
 │   │   ├── authService.js       # Curator HMAC-SHA256 token issuance & validation
-│   │   ├── cronService.js       # Weekly Saturday midnight automation scheduler
+│   │   ├── cronService.js       # Schedulers (Weekly Saturday midnight AI & Daily Drop Alerts)
 │   │   ├── cryptoService.js     # HMAC-SHA256 signature generation and validation
+│   │   ├── emailService.js      # Resend API transactional emails (Welcome & Daily Drops)
 │   │   ├── planetService.js     # Daily drop rotation orchestration without repetition
 │   │   └── subscriberService.js # RFC email validation and subscription sanitization
 ├── controllers/             # Presentation Layer (HTTP API Controllers)
@@ -128,6 +129,20 @@ Diretamente no final da aba do pôster (`#poster`), o usuário conta com a seç�
 npm run verify-poster "caminho/para/seu-poster.png"
 ```
 A ferramenta lê diretamente a estrutura binária do arquivo PNG, decodifica os chunks `tEXt` e calcula a assinatura contra a chave do servidor, informando o número da tiragem, o nome do titular e se o arquivo é autêntico ou adulterado.
+
+---
+
+## 📬 Sistema de Notificações Diárias & Boas-Vindas (Resend API)
+
+O observatório integra a API transacional do **Resend** para entrega de e-mails com garantia de recebimento na **Caixa Principal (Primary Inbox)**, evitando filtros de spam e a aba de promoções:
+
+1. **E-mail de Boas-Vindas Imediato:** Disparado de forma assíncrona assim que o usuário realiza a inscrição no formulário. Confirma a inscrição com layout limpo e instruções sobre os drops.
+2. **Alertas Diários Automatizados (00:00:10 BRT):** Agendador cron diário que sincroniza o planeta liberado e envia um boletim com dados de letalidade, temperatura e link direto para o pôster A4 a todos os assinantes ativos.
+3. **Padrão de Entregabilidade "Tyler Vigen":** E-mails diagramados em formato pessoal e minimalista com versão paralela em texto puro (`text`), elevando a reputação de entrega perante o algoritmo do Gmail/Outlook.
+4. **Comando de Teste de E-mail (CLI):**
+```bash
+npm run test-email "seu-email@dominio.com"
+```
 
 ---
 
