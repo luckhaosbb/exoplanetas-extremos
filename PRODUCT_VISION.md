@@ -121,7 +121,7 @@ Museum-grade, authorial fine art celebrating 1970s Jack Kirby cosmic graphic nov
 ```
 Daily Exoplanets/
 ├── ARCHITECTURE_AI_PIPELINE.md      # AI pipeline & Cascade Fallback Chain documentation
-├── DOCUMENTO_DE_VISAO.md            # Product vision and design specifications
+├── PRODUCT_VISION.md                # Product vision and design specifications
 ├── FSD.md                           # Functional Specification Document (FSD)
 ├── README.md                        # Technical documentation & onboarding guide
 ├── scripts/

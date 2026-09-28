@@ -51,7 +51,7 @@ The backend is built following **Layered Clean Architecture** and strictly adher
 ```
 Daily Exoplanets/
 ├── ARCHITECTURE_AI_PIPELINE.md  # Deep dive into AI cascade and weekly cron automation
-├── DOCUMENTO_DE_VISAO.md        # Product vision, requirements & design specs
+├── PRODUCT_VISION.md            # Product vision, requirements & design specs
 ├── FSD.md                       # Functional Specification Document (FSD)
 ├── server/
 │   ├── assets/planets/          # Confidential official full-bleed master artworks
