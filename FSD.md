@@ -1,10 +1,12 @@
 # 📄 FSD: ESPECIFICAÇÃO FUNCIONAL DO PROJETO (FUNCTIONAL SPECIFICATION DOCUMENT)
 ## EXOPLANETAS EXTREMOS - DROP DIÁRIO & CRIPTOGRAFIA DE AUTENTICIDADE
 
+> 🌐 **Plataforma Oficial em Produção:** **[https://exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/)**
+
 ---
 
 ### 1. Objetivo e Escopo
-Este documento detalha o funcionamento funcional, as regras de negócio, o layout visual e a arquitetura técnica da aplicação **Exoplanetas Extremos**, com ênfase na experiência visual do visualizador 3D, no novo layout limpo e autoral do Pôster Comic A4, e no protocolo de **Chave Criptográfica Invisível em Metadados Binários PNG (NFT-like Provenance)** para garantir a autenticidade dos downloads diários sem poluir a arte gráfica.
+Este documento detalha o funcionamento funcional, as regras de negócio, o layout visual e a arquitetura técnica da aplicação **Exoplanetas Extremos** (disponível publicamente em **[https://exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/)**), com ênfase na experiência visual do visualizador 3D, no novo layout limpo e autoral do Pôster Comic A4, e no protocolo de **Chave Criptográfica Invisível em Metadados Binários PNG (NFT-like Provenance)** para garantir a autenticidade dos downloads diários sem poluir a arte gráfica.
 
 ---
 
@@ -80,7 +82,7 @@ Qualquer pessoa em posse do arquivo ou de seu identificador pode auditá-lo:
   - **Consulta por Token ID:** Permite ao usuário colar seu código alfanumérico único para auditoria direta.
   - **Painel Holográfico de Verificação:** Apresenta o resultado com feedback sonoro (`scanBeep` ou `hazardAlert`), certificando o exemplar oficial, titular registrado, data do drop e assinatura HMAC-SHA256 validada contra o observatório.
 - **Via Linha de Comando (CLI):** `npm run verify-poster <caminho-do-arquivo.png>`
-- **Via Endpoint HTTP Direto:** `POST /api/verify-token` com os parâmetros do certificado ou `tokenId`.
+- **Via Endpoint HTTP Direto:** `POST https://exoplanets.luckhaosbb.dev/api/verify-token` (ou localmente `/api/verify-token`) com os parâmetros do certificado ou `tokenId`.
 - Se alguém tentar alterar o nome do titular dentro dos metadados ou adulterar a imagem, a assinatura matemática SHA-256 é invalidada e o validador reprova o arquivo imediatamente com `❌ CERTIFICADO INVÁLIDO OU ADULTERADO`.
 
 #### 4.5. Proteção de Infraestrutura & Concorrência Atômica

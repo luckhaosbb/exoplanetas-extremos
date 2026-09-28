@@ -1,11 +1,27 @@
 # 🪐 Extreme Exoplanets (Daily Extreme Exoplanet Archive)
 
+<div align="center">
+
+[![Website](https://img.shields.io/badge/🌐_VISIT_LIVE_WEBSITE-exoplanets.luckhaosbb.dev-00f0ff?style=for-the-badge&logo=googlechrome&logoColor=black)](https://exoplanets.luckhaosbb.dev/)
+[![Status](https://img.shields.io/badge/STATUS-ONLINE%20%2F%20PRODUCTION-success?style=for-the-badge)](https://exoplanets.luckhaosbb.dev/)
+[![NASA TAP API](https://img.shields.io/badge/NASA%20TAP-LIVE%20SYNC-informational?style=for-the-badge&logo=nasa)](https://exoplanets.luckhaosbb.dev/)
+
+### 🚀 **Acesse o Observatório em Produção:**  
+# 👉 **[https://exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/)** 👈
+
+*Explore daily extreme exoplanets, interactive 3D retro CRT orbital telemetry, and mint your authenticated A4 vintage comic poster before midnight.*
+
+---
+
+[![Production Web](https://img.shields.io/badge/Live_URL-https%3A%2F%2Fexoplanets.luckhaosbb.dev-00f0ff.svg?style=flat-square&logo=firefoxbrowser)](https://exoplanets.luckhaosbb.dev/)
 [![Node.js](https://img.shields.io/badge/Node.js-v20+-green.svg?style=flat-square&logo=node.js)](https://nodejs.org/)
 [![Express.js](https://img.shields.io/badge/Express-4.21-lightgrey.svg?style=flat-square&logo=express)](https://expressjs.com/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF.svg?style=flat-square&logo=vite)](https://vitejs.dev/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Ready-336791.svg?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
 [![Architecture](https://img.shields.io/badge/Architecture-SOLID%20Clean%20Design-blueviolet.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)]()
+
+</div>
 
 > **"In space, no one can hear you burn, get shredded by supersonic glass, or evaporate in iron rain."**  
 > *An interactive experience featuring retro-futuristic sci-fi aesthetics, inspired by NASA's "Galaxy of Horrors" and the Golden Age of Comic Books.*
@@ -14,7 +30,9 @@
 
 ## 🌌 Overview
 
-**Extreme Exoplanets** is a full-stack web application designed with enterprise-grade software engineering standards and senior systems design principles. The platform delivers **one deadly exoplanet every 24 hours** in an automated *Daily Drop* schedule, guaranteeing a non-repeating astronomical rotation cycle until catalog exhaustion.
+> 🌐 **Live Web Application:** **[https://exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/)**
+
+**Extreme Exoplanets** is a full-stack web application designed with enterprise-grade software engineering standards and senior systems design principles. Deployed and fully operational at **[exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/)**, the platform delivers **one deadly exoplanet every 24 hours** in an automated *Daily Drop* schedule, guaranteeing a non-repeating astronomical rotation cycle until catalog exhaustion.
 
 ### Core Features:
 1. **3D Telemetry CRT Sensor (Retro-futuristic Aesthetic):** Interactive spherical physics renderer with damped angular inertia, 3D dynamic lighting, scanlines, and custom atmospheric relief shaders unique to each world (Mach 7 silicate rain, stellar plasma, molten iron deluges, etc.).
@@ -148,7 +166,13 @@ npm run test-email "seu-email@dominio.com"
 
 ## 🚀 Getting Started
 
-### Prerequisites
+### 🌐 Instant Access (Production Live Demo)
+You don't need to run or install anything locally to explore the project. The platform is continuously deployed and live:  
+👉 **[https://exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/)**
+
+---
+
+### Prerequisites (For Local Development)
 - [Node.js](https://nodejs.org/) v18+ (LTS recommended)
 - `npm` package manager
 
@@ -197,8 +221,11 @@ npm start
 
 ---
 
-## 👨‍💻 Author
+## 👨‍💻 Author & Project Links
 
-Crafted by **Lucas Gomes**  
-- GitHub: [@luckhaosbb](https://github.com/luckhaosbb)  
-- Website: [luckhaosbb.dev](https://luckhaosbb.dev)
+Crafted with dedication by **Lucas Gomes**  
+- 🪐 **Website Oficial do Projeto:** [https://exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/)  
+- 💻 **Portfólio Pessoal:** [https://luckhaosbb.dev](https://luckhaosbb.dev)  
+- 🐙 **GitHub:** [@luckhaosbb](https://github.com/luckhaosbb)  
+- 💼 **LinkedIn:** [Lucas Gomes](https://www.linkedin.com/in/lucas-gomes-ab49582bb)
+

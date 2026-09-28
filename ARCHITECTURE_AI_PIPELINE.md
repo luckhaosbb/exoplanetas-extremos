@@ -2,6 +2,7 @@
 
 > **Documento Oficial de Engenharia de Software e Segurança**  
 > **Projeto:** Exoplanetas Extremos (Daily Exoplanets)  
+> **Website Oficial em Produção:** **[https://exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/)**  
 > **Autor/Curador:** Lucas Gomes (github.com/luckhaosbb)  
 > **Padrão Arquitetural:** Circuit Breaker / Cascade Fallback Chain (Alta Disponibilidade)
 
@@ -136,5 +137,7 @@ Para validar a integridade de todo o pipeline sem esperar a meia-noite de sábad
 | **Disparo Manual do Ciclo** | Clicar em *"⚡ Executar Ciclo da Próxima Semana"* na tela de curadoria |
 | **Regeneração Individual** | Clicar em *"🔄 Regenerar Arte"* no card do planeta selecionado |
 | **Teste de Build Frontend** | `npm run build` (Valida empacotamento estático do Vite) |
-| **Verificação de Healthcheck** | `curl http://localhost:3001/api/planet-of-the-day` |
+| **Ambiente de Produção (Online)** | [https://exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/) |
+| **Healthcheck da API (Produção)** | `curl https://exoplanets.luckhaosbb.dev/api/health` |
+| **Verificação de Healthcheck (Local)** | `curl http://localhost:3001/api/planet-of-the-day` |
 

@@ -1,12 +1,13 @@
 # 🪐 DOCUMENTO DE VISÃO: EXOPLANETAS EXTREMOS (MUNDOS MORTAIS)
 
+> 🌐 **Plataforma Oficial em Produção:** **[https://exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/)**  
 > **"No espaço, ninguém pode ouvir você queimar, ser estraçalhado por vidro supersônico ou evaporar em chuva de ferro."**  
 > *Inspirado no projeto "Galaxy of Horrors" da NASA.*
 
 ---
 
 ## 1. Visão Geral do Produto
-O **Exoplanetas Extremos** é uma experiência web interativa, atmosférica e geek focada em apresentar **um único exoplaneta mortal a cada 24 horas**. 
+O **Exoplanetas Extremos** (disponível publicamente em **[https://exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/)**) é uma experiência web interativa, atmosférica e geek focada em apresentar **um único exoplaneta mortal a cada 24 horas**. 
 
 A cada dia, um novo mundo hostil é selecionado pelo sistema de forma inédita. A página revela detalhes científicos e aterrorizantes das condições extremas do planeta através de uma interface inspirada em terminais de ficção científica e monitores retrô (estética CRT/jogos espaciais). 
 
@@ -106,10 +107,12 @@ Arte limpa, autoral e com forte identidade de graphic novel cósmica vintage (es
   - Módulo confidencial para o autor inspecionar e auditar antecipadamente os 7 exoplanetas da próxima semana.
   - Exibe o status das artes (`● Arte Pronta` ou `○ Aguardando`), o preview do pôster A4 Full-Bleed e botão **"🔄 Regenerar Arte (Google Imagen 3)"** para regerar qualquer ilustração individualmente com um clique.
   - Botão **"⚡ Executar Ciclo da Próxima Semana"** para disparar o agendamento e a fila de geração sob demanda a qualquer momento.
-- **Seção de Autoria no Rodapé:**
+- **Seção de Autoria no Rodapé & Links Oficiais:**
+  - **Website Oficial da Aplicação:** [https://exoplanets.luckhaosbb.dev](https://exoplanets.luckhaosbb.dev/)
   - Link direto para o perfil do desenvolvedor no **GitHub** (`https://github.com/luckhaosbb`).
   - Link direto para o perfil profissional no **LinkedIn** (`https://www.linkedin.com/in/lucas-gomes-ab49582bb`).
   - Link direto para contato via **WhatsApp** (`https://wa.me/5585997893548`).
+  - Link para o portfólio pessoal (`https://luckhaosbb.dev`).
   - Informações de créditos acadêmicos e dados da NASA Exoplanet Archive.
 
 ---
